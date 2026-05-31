@@ -12,8 +12,14 @@
         .form-group { margin-bottom: 1.5rem; } 
         .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted); } 
         .form-group input, .form-group textarea, .form-group select { width: 100%; background: #050505; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.8rem 1rem; color: var(--text-color); font-family: var(--font-family); font-size: 1rem; outline: none; transition: border-color 0.2s; } 
-        .btn { background: var(--accent-color); color: #000000; border: none; padding: 0.8rem 2rem; font-weight: 600; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: opacity 0.2s; } 
+        .btn { background: var(--accent-color); color: #000000; border: none; padding: 0.8rem 2rem; font-weight: 600; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: opacity 0.2s; margin-bottom: 1rem;} 
         .btn:hover { opacity: 0.9; }
+        
+        /* ส่วนที่เพิ่มมาสำหรับแสดงโค้ดผลลัพธ์ */
+        #result-box { display: none; background: #18181b; padding: 1.5rem; border-radius: 8px; border: 1px solid #3f3f46; margin-top: 1rem;}
+        #result-box h3 { color: #10b981; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        #result-code { width: 100%; height: 150px; background: #000; color: #fff; padding: 10px; font-family: monospace; border: 1px solid #3f3f46; border-radius: 6px; font-size: 0.85rem; margin-bottom: 1rem; }
+        .btn-copy { background: #3b82f6; color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -37,18 +43,24 @@
             </div>
             <div class="form-group">
                 <label>อัปโหลดรูปภาพประกอบ (ระบุหรือไม่ก็ได้)</label>
-                <!-- ระบบเลือกรูปที่เพิ่มมาใหม่ -->
                 <input type="file" id="imageInput" accept="image/*">
                 <img id="preview" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-top: 1.5rem; display: none; border: 1px solid var(--border-color);">
             </div>
-            <button type="submit" class="btn">เผยแพร่อัปเดต</button>
+            <button type="submit" class="btn">สร้างโค้ดสำหรับอัปเดต</button>
         </form>
+
+        <div id="result-box">
+            <h3>สร้างข้อมูลสำเร็จ!</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">คัดลอกโค้ดด้านล่างนี้ ไปวางแทรกในตัวแปร `posts` ในไฟล์ index.html บน GitHub</p>
+            <textarea id="result-code" readonly></textarea>
+            <button class="btn-copy" onclick="copyCode()">คัดลอกโค้ด</button>
+        </div>
     </div>
 
     <script>
         const imageInput = document.getElementById('imageInput');
         const preview = document.getElementById('preview');
-        let selectedImage = "";
+        let selectedImage = "null"; // ถ้าไม่เลือกรูป จะให้ค่าเป็น null
 
         imageInput.addEventListener('change', function() {
             const file = this.files[0];
@@ -57,19 +69,53 @@
                 reader.onload = (e) => {
                     preview.src = e.target.result;
                     preview.style.display = 'block';
-                    selectedImage = e.target.result; // เก็บไฟล์รูปเป็น Base64
+                    // ครอบเครื่องหมายคำพูดให้เป็น String
+                    selectedImage = `"${e.target.result}"`; 
                 };
                 reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+                selectedImage = "null";
             }
         });
 
         document.getElementById('post-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            alert("เตรียมส่งข้อมูลไปยังระบบดึงโพสต์!");
-            // ชุดข้อมูลที่จะส่ง
-            console.log("หัวข้อ:", document.getElementById('post-title').value);
-            console.log("รูปภาพ:", selectedImage);
+            
+            const title = document.getElementById('post-title').value;
+            const category = document.getElementById('post-category').value;
+            let content = document.getElementById('post-content').value;
+            
+            // จัดการพวกการขึ้นบรรทัดใหม่ให้พังตอนไปวางในโค้ด
+            content = content.replace(/\n/g, '<br>');
+
+            // สร้างวันที่แบบไทย
+            const today = new Date();
+            const dateStr = `${today.getDate()} ${today.toLocaleString('th-TH', { month: 'long' })} ${today.getFullYear() + 543}`;
+
+            // จัดฟอร์แมตโค้ดสำหรับก๊อปปี้
+            const generatedCode = `{ 
+    id: Date.now(), 
+    title: "${title}", 
+    category: "${category}", 
+    date: "${dateStr}", 
+    content: "${content}", 
+    image: ${selectedImage} 
+},`;
+
+            // แสดงกล่องผลลัพธ์
+            const resultBox = document.getElementById('result-box');
+            const resultCode = document.getElementById('result-code');
+            resultBox.style.display = 'block';
+            resultCode.value = generatedCode;
         });
+
+        function copyCode() {
+            const resultCode = document.getElementById('result-code');
+            resultCode.select();
+            document.execCommand('copy');
+            alert("คัดลอกโค้ดแล้ว! นำไปวางในไฟล์ index.html ได้เลยครับ");
+        }
     </script>
 </body>
 </html>
