@@ -42,13 +42,6 @@
         .post-card h3 { font-size: 1.6rem; margin-bottom: 1rem; color: var(--accent-color); } 
         .post-content { font-size: 1.05rem; line-height: 1.7; color: #d4d4d8; white-space: pre-wrap; } 
         .post-img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-top: 1.5rem; border: 1px solid var(--border-color); } 
-        .admin-container { max-width: 700px; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--border-color); padding: 3rem; border-radius: 16px; } 
-        .admin-container h2 { margin-bottom: 1.5rem; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; } 
-        .form-group { margin-bottom: 1.5rem; } 
-        .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted); } 
-        .form-group input, .form-group textarea, .form-group select { width: 100%; background: #050505; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.8rem 1rem; color: var(--text-color); font-family: var(--font-family); font-size: 1rem; outline: none; transition: border-color 0.2s; } 
-        .btn { background: var(--accent-color); color: #000000; border: none; padding: 0.8rem 2rem; font-weight: 600; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: opacity 0.2s; } 
-        .btn:hover { opacity: 0.9; } 
         footer { margin-top: 8rem; border-top: 1px solid var(--border-color); padding: 4rem 2rem; background-color: #09090b; } 
         .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; } 
         .footer-brand h4 { font-size: 1.2rem; letter-spacing: 1px; margin-bottom: 1rem; color: var(--accent-color); } 
@@ -66,6 +59,147 @@
     <header>
         <div class="nav-container">
             <div class="logo-section">SPARKONE</div>
+            <nav>
+                <ul>
+                    <li><a onclick="switchView('home')" id="nav-home" class="active">หน้าหลัก</a></li>
+                    <li><a onclick="switchView('updates')" id="nav-updates">อัพเดตความคืบหน้า</a></li>
+                    <li><a onclick="switchView('contact')" id="nav-contact">ติดต่อเรา</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="view-home" class="view-section active">
+            <div class="hero">
+                <h1>BUILDING THE NEW STAR OF INTELLIGENCE.</h1>
+                <p>เรากำลังปฏิวัติมิติใหม่แห่งการเชื่อมโยงระหว่างมนุษย์และปัญญาประดิษฐ์ ผ่านสถาปัตยกรรมระดับเนกซ์เจนเนอเรชัน</p>
+                <div class="tag-container">
+                    <span>AI Agents</span>
+                    <span>Automation</span>
+                    <span>Innovation</span>
+                </div>
+            </div>
+
+            <div class="vision-grid">
+                <div class="vision-card">
+                    <h3>ความจำระยะยาวข้ามปี (Infinite Memory)</h3>
+                    <p>NOVA ถูกออกแบบขึ้นมาให้จดจำและเข้าใจว่าคุณคือใครอย่างแท้จริง มีความสามารถสะสม Context และความทรงจำได้อย่างยาวนาน แม้จะเป็นบทสนทนาเก่าที่ผ่านไปเกือบปี NOVA ก็สามารถรื้อฟื้นและนำกลับมาคิดวิเคราะห์ร่วมกับพฤติกรรมปัจจุบันของคุณได้โดยไม่มีวันสูญหาย</p>
+                </div>
+                <div class="vision-card">
+                    <h3>การประเมินและสั่งการเชิงรุก (Proactive Automation)</h3>
+                    <p>ไม่ใช่แค่ผู้รับคำสั่ง แต่เป็นผู้ดูแลส่วนตัวขั้นสูง NOVA รู้ว่าคุณจะกลับบ้านตอนไหน พร้อมจัดการเปิดไฟและปรับอุณหภูมิเครื่องปรับอากาศให้คุณล่วงหน้าอย่างสมบูรณ์แบบ พร้อมทั้งเฝ้าระวังความปลอดภัยตรวจจับผู้บุกรุกภายในบ้านโดยอัตโนมัติ</p>
+                </div>
+                <div class="vision-card">
+                    <h3>ผู้ช่วยอัจฉริยะส่วนบุคคล (Cognitive Companion)</h3>
+                    <p>NOVA จะคอยทวงถามและแจ้งเตือนนัดหมายสำคัญ รวมถึงเรื่องที่คุณคุยค้างไว้เมื่อวานนี้อย่างชาญฉลาด ทันทีที่ระบบตรวจพบสัญญาณว่าคุณอาจจะลืมภารกิจนั้นๆ โดยที่พฤติกรรมการแจ้งเตือนจะปรับเปลี่ยนไปตามบริบทชีวิตจริงอย่างราบรื่น</p>
+                </div>
+                <div class="vision-card">
+                    <h3>ตื่นนอนพร้อมรายงานอัจฉริยะ (Seamless Morning Brief)</h3>
+                    <p>NOVA คือคนแรกที่รับรู้เมื่อคุณตื่นนอน พร้อมอรุณสวัสดิ์ รายงานสภาพอากาศ และสรุปใจความสำคัญของข้อความทั้งหมดที่ถูกส่งมาในยามที่คุณหลับใหล นำเสนอข้อมูลสำคัญผ่านระบบเสียงและการแจ้งเตือนอัจฉริยะโดยที่คุณไม่จำเป็นต้องเสียเวลาเปิดแอปพลิเคชันใดๆ</p>
+                </div>
+            </div>
+
+            <div class="security-banner">
+                <h2>ความปลอดภัยและความเป็นส่วนตัวขั้นสูงสุด</h2>
+                <p>เรายึดมั่นในนโยบายความเป็นส่วนตัวสูงสุด ข้อมูลทุกอย่างได้รับการเข้ารหัสต้นทางถึงปลายทาง พร้อมติดตั้งระบบสแกนความปลอดภัยอัจฉริยะสำหรับไฟล์และข้อมูลของผู้ใช้ทุกประเภทเพื่อปกป้องความเป็นส่วนตัวขั้นสูงสุด</p>
+            </div>
+        </section>
+
+        <section id="view-updates" class="view-section">
+            <div class="feed-container">
+                <div class="feed-header">
+                    <h2>บันทึกความคืบหน้าและการพัฒนา</h2>
+                    <p>ติดตามความเคลื่อนไหวล่าสุดของโปรเจกต์ AI Agent 'NOVA'</p>
+                </div>
+                <div id="posts-target">
+                    <p style="text-align:center;color:var(--text-muted);">กำลังโหลดข้อมูล...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-contact" class="view-section">
+            <div class="feed-container">
+                <div class="feed-header">
+                    <h2>ติดต่อเรา</h2>
+                </div>
+                <div class="post-card">
+                    <p><strong>ผู้ก่อตั้งโครงการ:</strong> Kittipong Chanpeng</p>
+                    <br>
+                    <p><strong>อีเมล:</strong> sparkone.dev@gmail.com</p>
+                    <br>
+                    <p><strong>Facebook Page:</strong> SparkOne</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Firebase Config ของคุณ
+        const firebaseConfig = {
+            apiKey: "AIzaSyCFVUtZCTAp_9zSAyrUloNJL62jmpA9xd0",
+            authDomain: "sparkone-8a4cd.firebaseapp.com",
+            projectId: "sparkone-8a4cd",
+            storageBucket: "sparkone-8a4cd.firebasestorage.app",
+            messagingSenderId: "18493406888",
+            appId: "1:18493406888:web:29c39352229a8ca30bcc9d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ระบบสลับหน้าจอ (คงเดิม)
+        window.switchView = function(v) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.getElementById('view-' + v).classList.add('active');
+            document.querySelectorAll('nav a').forEach(l => l.classList.remove('active'));
+            const sel = document.getElementById('nav-' + v);
+            if (sel) sel.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ระบบดึงข้อมูลจาก Firebase ทันทีที่เปิดเว็บ
+        async function fetchPosts() {
+            try {
+                const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                let postsHTML = '';
+                
+                querySnapshot.forEach((doc) => {
+                    const post = doc.data();
+                    postsHTML += `
+                        <div class="post-card">
+                            <div class="post-meta">
+                                <span class="post-tag">${post.category}</span>
+                                <span>•</span>
+                                <span>${post.dateStr}</span>
+                            </div>
+                            <h3>${post.title}</h3>
+                            <div class="post-content">${post.content}</div>
+                            ${post.image && post.image !== 'null' ? `<img src="${post.image}" class="post-img">` : ''}
+                        </div>
+                    `;
+                });
+
+                const target = document.getElementById('posts-target');
+                if(postsHTML === '') {
+                    target.innerHTML = '<p style="text-align:center;color:var(--text-muted);">ยังไม่มีอัปเดตใหม่ในขณะนี้</p>';
+                } else {
+                    target.innerHTML = postsHTML;
+                }
+            } catch (error) {
+                console.error("Error loading posts:", error);
+                document.getElementById('posts-target').innerHTML = '<p style="text-align:center;color:var(--text-muted);">ไม่สามารถโหลดข้อมูลได้ โปรดลองใหม่อีกครั้ง</p>';
+            }
+        }
+
+        fetchPosts();
+    </script>
+</body>
+</html>
             <nav>
                 <ul>
                     <li><a onclick="switchView('home')" id="nav-home" class="active">หน้าหลัก</a></li>
