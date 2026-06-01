@@ -293,3 +293,257 @@
 
     const firebaseConfig = {
         apiKey: "AIzaSyCFVUtZCTAp_9zSAyrUloNJL62jmpA9xd0"
+            authDomain: "sparkone-8a4cd.firebaseapp.com",
+        projectId: "sparkone-8a4cd",
+        storageBucket: "sparkone-8a4cd.firebasestorage.app",
+        messagingSenderId: "18493406888",
+        appId: "1:18493406888:web:29c39352229a8ca30bcc9d"
+    };
+
+    const ADMIN_EMAIL = "sparkone.dev@gmail.com";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+
+    // ─── AUTH STATE ───
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        const navAuth = document.getElementById('nav-auth');
+
+        if (user) {
+            const isAdmin = user.email === ADMIN_EMAIL;
+            navAuth.innerHTML = `
+                <div class="user-nav-badge">
+                    <img src="${user.photoURL}" alt="${user.displayName}">
+                    <span class="user-name">${user.displayName}${isAdmin ? ' <span style="color:#ef4444;font-size:0.75rem">[ADMIN]</span>' : ''}</span>
+                    <button class="btn-logout" onclick="window.doSignOut()"><i class="bi bi-box-arrow-right"></i> ออก</button>
+                </div>`;
+            // refresh comment areas to show input box
+            document.querySelectorAll('.comment-input-area, .comment-login-prompt').forEach(el => {
+                if (el.classList.contains('comment-input-area')) el.style.display = 'flex';
+                if (el.classList.contains('comment-login-prompt')) el.style.display = 'none';
+            });
+            closeLoginModal();
+        } else {
+            navAuth.innerHTML = `<button class="btn-login-nav" onclick="openLoginModal()"><i class="bi bi-google"></i> Sign in</button>`;
+            document.querySelectorAll('.comment-input-area, .comment-login-prompt').forEach(el => {
+                if (el.classList.contains('comment-input-area')) el.style.display = 'none';
+                if (el.classList.contains('comment-login-prompt')) el.style.display = 'flex';
+            });
+        }
+    });
+
+    window.doSignOut = () => signOut(auth);
+
+    // ─── LOGIN MODAL ───
+    window.openLoginModal = () => document.getElementById('login-modal').classList.add('open');
+    window.closeLoginModal = () => document.getElementById('login-modal').classList.remove('open');
+    document.getElementById('login-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('login-modal')) closeLoginModal();
+    });
+
+    document.getElementById('google-login-btn').onclick = () => {
+        signInWithPopup(auth, provider).catch(console.error);
+    };
+
+    // ─── SWITCH VIEW ───
+    window.switchView = function(v) {
+        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+        document.getElementById('view-' + v).classList.add('active');
+        document.querySelectorAll('nav a').forEach(l => l.classList.remove('active'));
+        const sel = document.getElementById('nav-' + v);
+        if (sel) sel.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // ─── FETCH POSTS ───
+    async function fetchPosts() {
+        try {
+            const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            const target = document.getElementById('posts-target');
+
+            if (querySnapshot.empty) {
+                target.innerHTML = '<p style="text-align:center;color:var(--text-muted);">ยังไม่มีอัปเดตใหม่ในขณะนี้</p>';
+                return;
+            }
+
+            target.innerHTML = '';
+            querySnapshot.forEach((docSnap) => {
+                const post = docSnap.data();
+                const postId = docSnap.id;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'post-card';
+                wrapper.innerHTML = `
+                    <div class="post-meta">
+                        <span class="post-tag">${post.category || ''}</span>
+                        <span>•</span>
+                        <span>${post.dateStr || ''}</span>
+                    </div>
+                    <h3>${post.title || ''}</h3>
+                    <div class="post-content">${post.content || ''}</div>
+                    ${post.image && post.image !== 'null' ? `<img src="${post.image}" class="post-img">` : ''}
+                    <div class="comment-section">
+                        <div class="comment-section-title"><i class="bi bi-chat-dots"></i> ความคิดเห็น</div>
+                        <!-- Input area (shown when logged in) -->
+                        <div class="comment-input-area" style="display:none;" data-post-id="${postId}">
+                            <div class="comment-input-avatar" id="avatar-${postId}">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div class="comment-input-wrap">
+                                <textarea class="comment-input" id="input-${postId}" placeholder="เขียนความคิดเห็น..." rows="1"
+                                    oninput="autoResize(this)"></textarea>
+                                <button class="btn-comment-submit" onclick="submitComment('${postId}')">
+                                    <i class="bi bi-send"></i> ส่ง
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Login prompt (shown when logged out) -->
+                        <div class="comment-login-prompt" style="display:flex;">
+                            <p><i class="bi bi-lock"></i> เข้าสู่ระบบเพื่อแสดงความคิดเห็น</p>
+                            <button class="btn-login-prompt" onclick="openLoginModal()">
+                                <i class="bi bi-google"></i> Sign in
+                            </button>
+                        </div>
+                        <!-- Comments list -->
+                        <div class="comment-list" id="comments-${postId}">
+                            <p class="comment-loading">กำลังโหลด...</p>
+                        </div>
+                    </div>`;
+                target.appendChild(wrapper);
+
+                // update avatar if user already logged in
+                updateAvatarInPost(postId);
+
+                // live-listen comments for this post
+                listenComments(postId);
+            });
+
+            // After rendering, apply current auth state to show/hide inputs
+            if (currentUser) {
+                document.querySelectorAll('.comment-input-area').forEach(el => el.style.display = 'flex');
+                document.querySelectorAll('.comment-login-prompt').forEach(el => el.style.display = 'none');
+            }
+
+        } catch (error) {
+            console.error("Error loading posts:", error);
+            document.getElementById('posts-target').innerHTML =
+                '<p style="text-align:center;color:var(--text-muted);">ไม่สามารถโหลดข้อมูลได้ โปรดลองใหม่อีกครั้ง</p>';
+        }
+    }
+
+    function updateAvatarInPost(postId) {
+        const avatarEl = document.getElementById('avatar-' + postId);
+        if (!avatarEl) return;
+        if (currentUser && currentUser.photoURL) {
+            avatarEl.innerHTML = `<img src="${currentUser.photoURL}" alt="">`;
+        } else {
+            avatarEl.innerHTML = `<i class="bi bi-person"></i>`;
+        }
+    }
+
+    // ─── LISTEN COMMENTS (real-time) ───
+    function listenComments(postId) {
+        const q = query(
+            collection(db, "comments"),
+            where("postId", "==", postId),
+            orderBy("createdAt", "asc")
+        );
+        onSnapshot(q, (snapshot) => {
+            const listEl = document.getElementById('comments-' + postId);
+            if (!listEl) return;
+            if (snapshot.empty) {
+                listEl.innerHTML = '<p class="no-comments">ยังไม่มีความคิดเห็น เป็นคนแรกที่แสดงความคิดเห็น!</p>';
+                return;
+            }
+            listEl.innerHTML = '';
+            snapshot.forEach((docSnap) => {
+                const c = docSnap.data();
+                const isAdmin = c.userEmail === ADMIN_EMAIL;
+                const time = c.createdAt ? formatTime(c.createdAt.toDate()) : '';
+                const item = document.createElement('div');
+                item.className = 'comment-item';
+                item.innerHTML = `
+                    <div class="comment-avatar">
+                        <img src="${c.userPhoto || ''}" alt="${c.userName}" onerror="this.style.display='none'">
+                    </div>
+                    <div class="comment-body">
+                        <div class="comment-author">
+                            ${c.userName}
+                            ${isAdmin ? '<span class="admin-label">ADMIN</span>' : ''}
+                            <span class="comment-timestamp">${time}</span>
+                        </div>
+                        <div class="comment-text">${escapeHtml(c.text)}</div>
+                    </div>`;
+                listEl.appendChild(item);
+            });
+        }, (err) => {
+            console.error("Comment listen error:", err);
+        });
+    }
+
+    // ─── SUBMIT COMMENT ───
+    window.submitComment = async function(postId) {
+        if (!currentUser) { openLoginModal(); return; }
+        const inputEl = document.getElementById('input-' + postId);
+        const text = inputEl.value.trim();
+        if (!text) return;
+
+        const btn = inputEl.closest('.comment-input-wrap').querySelector('.btn-comment-submit');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+        try {
+            await addDoc(collection(db, "comments"), {
+                postId: postId,
+                text: text,
+                userId: currentUser.uid,
+                userName: currentUser.displayName,
+                userEmail: currentUser.email,
+                userPhoto: currentUser.photoURL || '',
+                createdAt: serverTimestamp()
+            });
+            inputEl.value = '';
+            inputEl.style.height = 'auto';
+        } catch (e) {
+            console.error("Submit comment error:", e);
+            alert("ส่งความคิดเห็นไม่สำเร็จ โปรดลองใหม่อีกครั้ง");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-send"></i> ส่ง';
+        }
+    };
+
+    // ─── HELPERS ───
+    window.autoResize = function(el) {
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
+    };
+
+    window.autoResize = function(el) {
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    };
+
+    function escapeHtml(str) {
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function formatTime(date) {
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000);
+        if (diff < 60) return 'เมื่อกี้';
+        if (diff < 3600) return `${Math.floor(diff/60)} นาทีที่แล้ว`;
+        if (diff < 86400) return `${Math.floor(diff/3600)} ชั่วโมงที่แล้ว`;
+        return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    // ─── INIT ───
+    fetchPosts();
+</script>
+</body>
+</html>
