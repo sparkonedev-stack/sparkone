@@ -594,18 +594,25 @@ window.closeLoginIfBg=function(e){if(e.target.id==='login-modal')closeLoginModal
 
 // SHARE MODAL
 let currentShareUrl='';
-window.openShare=function(postTitle,postId){
-  currentShareUrl=window.location.origin+window.location.pathname+'#post-'+postId;
-  const enc=encodeURIComponent(currentShareUrl);
-  const txt=encodeURIComponent('อ่านโพสต์: '+postTitle+' บน SparkOne');
+window.openShare=async function(postTitle,postId){
+  const url=window.location.origin+window.location.pathname+'?post='+postId;
+  const text='อ่านโพสต์: '+postTitle+' บน SparkOne';
+  // Web Share API — native OS share sheet (รองรับมือถือทุกรุ่น)
+  if(navigator.share){
+    try{await navigator.share({title:'SparkOne — '+postTitle,text:text,url:url});return;}
+    catch(e){if(e.name==='AbortError')return;}
+  }
+  // Fallback modal สำหรับ desktop
+  currentShareUrl=url;
+  const enc=encodeURIComponent(url),txt=encodeURIComponent(text);
   document.getElementById('sh-fb').href='https://www.facebook.com/sharer/sharer.php?u='+enc;
   document.getElementById('sh-msg').href='https://www.facebook.com/dialog/send?link='+enc+'&app_id=291494419107518&redirect_uri='+enc;
   document.getElementById('sh-line').href='https://line.me/R/msg/text/?'+txt+'%20'+enc;
   document.getElementById('sh-tw').href='https://twitter.com/intent/tweet?url='+enc+'&text='+txt;
   document.getElementById('sh-ig').href='https://www.instagram.com/';
   document.getElementById('sh-wa').href='https://api.whatsapp.com/send?text='+txt+'%20'+enc;
-  document.getElementById('sh-ai').href='https://claude.ai/new?q='+encodeURIComponent('ช่วยสรุปและอธิบายโพสต์นี้ให้หน่อย: '+currentShareUrl);
-  document.getElementById('share-url-display').textContent=currentShareUrl;
+  document.getElementById('sh-ai').onclick=function(e){e.preventDefault();openAiSharePicker(text,url);};
+  document.getElementById('share-url-display').textContent=url;
   document.getElementById('share-modal').classList.add('open');
 };
 window.closeShare=function(){document.getElementById('share-modal').classList.remove('open');};
@@ -613,11 +620,46 @@ window.closeShareIfBg=function(e){if(e.target.id==='share-modal')closeShare();};
 window.copyShareLink=function(){
   navigator.clipboard.writeText(currentShareUrl).then(()=>{
     const btn=document.querySelector('.share-copy-btn');
+    if(!btn)return;
     btn.innerHTML='<i class="bi bi-check"></i> คัดลอกแล้ว';
     setTimeout(()=>{btn.innerHTML='<i class="bi bi-clipboard"></i> คัดลอก';},2000);
+  }).catch(()=>{
+    const el=document.createElement('textarea');el.value=currentShareUrl;
+    document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);
   });
 };
-
+// AI Share Picker
+const aiApps=[
+  {name:'Claude',icon:'bi-stars',color:'#a78bfa',q:(t,u)=>'https://claude.ai/new?q='+encodeURIComponent('สรุปและอธิบายโพสต์นี้: '+u+' \n\nเนื้อหา: '+t)},
+  {name:'ChatGPT',icon:'bi-chat-dots-fill',color:'#4ade80',q:(t,u)=>'https://chat.openai.com/?q='+encodeURIComponent('สรุปโพสต์: '+t+' '+u)},
+  {name:'Gemini',icon:'bi-gem',color:'#60a5fa',q:(t,u)=>'https://gemini.google.com/app?q='+encodeURIComponent('ช่วยสรุป: '+t+' '+u)},
+  {name:'Copilot',icon:'bi-microsoft',color:'#38bdf8',q:(t,u)=>'https://copilot.microsoft.com/?q='+encodeURIComponent(t+' '+u)},
+  {name:'Perplexity',icon:'bi-search',color:'#fb923c',q:(t,u)=>'https://www.perplexity.ai/search?q='+encodeURIComponent(t)},
+  {name:'Grok',icon:'bi-lightning-charge-fill',color:'#facc15',q:(t,u)=>'https://x.com/i/grok?text='+encodeURIComponent(t+' '+u)},
+];
+window.openAiSharePicker=function(text,url){
+  closeShare();
+  let ex=document.getElementById('ai-picker');if(ex)ex.remove();
+  const m=document.createElement('div');m.id='ai-picker';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(14px);z-index:210;display:flex;align-items:flex-end;justify-content:center;';
+  m.innerHTML=`<div style="background:#0f0f12;border:1px solid #27272a;border-radius:16px 16px 0 0;width:100%;max-width:480px;padding:1.4rem 1.4rem 2.2rem;animation:slideUp 0.22s cubic-bezier(0.16,1,0.3,1);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+      <span style="font-size:0.8rem;color:#71717a;text-transform:uppercase;letter-spacing:1px;"><i class="bi bi-stars" style="color:#a78bfa"></i> ส่งให้ AI ตัวไหน?</span>
+      <button onclick="document.getElementById('ai-picker').remove()" style="background:rgba(255,255,255,0.07);border:none;color:#71717a;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.85rem;"><i class="bi bi-x"></i></button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      ${aiApps.map(ai=>`<a href="${ai.q(text,url)}" target="_blank" onclick="document.getElementById('ai-picker').remove()"
+        style="display:flex;flex-direction:column;align-items:center;gap:7px;background:#18181b;border:1px solid #27272a;border-radius:10px;padding:16px 8px;text-decoration:none;color:#e4e4e7;transition:border-color 0.15s;"
+        onmouseover="this.style.borderColor='${ai.color}'" onmouseout="this.style.borderColor='#27272a'">
+        <i class="bi ${ai.icon}" style="font-size:1.5rem;color:${ai.color};"></i>
+        <span style="font-size:0.72rem;">${ai.name}</span>
+      </a>`).join('')}
+    </div>
+    <p style="font-size:0.7rem;color:#3f3f46;text-align:center;margin-top:1rem;">AI จะได้รับลิงก์และเนื้อหาโพสต์เพื่อช่วยอ่านและสรุป</p>
+  </div>`;
+  m.addEventListener('click',e=>{if(e.target===m)m.remove();});
+  document.body.appendChild(m);
+};
 // PROJECTS
 const projects={nova:{name:'NOVA',tagline:'AI Personal Agent — Next-Generation Intelligence',logo:'https://raw.githubusercontent.com/sparkonedev-stack/assets/main/1780154700538_image_repair_1780258904130.png',overview:'NOVA คือ AI Agent ผู้ช่วยส่วนตัวขั้นสูง ที่จดจำ เข้าใจ และดูแลชีวิตประจำวันของคุณผ่านระบบ Infinite Memory และ Proactive Automation',problem:'แก้ปัญหา AI ที่ลืมทุกอย่างหลังปิดแชท ไม่รู้จักบริบทชีวิตจริงของผู้ใช้ และไม่สามารถทำงานเชิงรุกได้',progress:35,progressText:'Phase 1 — Core Memory System (35%)',tags:['Python','LLM','Firebase','Node.js','WebSocket']}};
 window.openProject=function(id){const p=projects[id];if(!p)return;document.getElementById('pp-logo').src=p.logo;document.getElementById('pp-name').textContent=p.name;document.getElementById('pp-tagline').textContent=p.tagline;document.getElementById('pp-overview').textContent=p.overview;document.getElementById('pp-problem').textContent=p.problem;document.getElementById('pp-bar').style.width=p.progress+'%';document.getElementById('pp-prog-txt').textContent=p.progressText;document.getElementById('pp-tags').innerHTML=p.tags.map(t=>`<span class="popup-tag">${t}</span>`).join('');document.getElementById('proj-popup').classList.add('open');};
@@ -712,13 +754,14 @@ window.closeMascot = function() {
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getAuth,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut,browserLocalPersistence,setPersistence}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import{getFirestore,collection,getDocs,addDoc,query,orderBy,where,onSnapshot,serverTimestamp,doc,updateDoc,increment,getDoc}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import{getFirestore,collection,getDocs,addDoc,query,orderBy,where,onSnapshot,serverTimestamp,doc,updateDoc,increment,getDoc,setDoc,limit}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const ADMIN='sparkone.dev@gmail.com';
 const app=initializeApp({apiKey:"AIzaSyCFVUtZCTAp_9zSAyrUloNJL62jmpA9xd0",authDomain:"sparkone-8a4cd.firebaseapp.com",projectId:"sparkone-8a4cd",storageBucket:"sparkone-8a4cd.firebasestorage.app",messagingSenderId:"18493406888",appId:"1:18493406888:web:29c39352229a8ca30bcc9d"});
 const auth=getAuth(app),db=getFirestore(app),provider=new GoogleAuthProvider();
 let currentUser=null;
 
+// ── AUTH ──
 document.getElementById('google-login-btn').onclick=async()=>{
   try{await setPersistence(auth,browserLocalPersistence);await signInWithPopup(auth,provider);}catch(e){console.error(e);}
 };
@@ -726,134 +769,173 @@ document.getElementById('google-login-btn').onclick=async()=>{
 onAuthStateChanged(auth,user=>{
   currentUser=user;
   const isAdmin=user&&user.email===ADMIN;
-  // header
+  // Header
   document.getElementById('hdr-auth').innerHTML=user
     ?`<div class="hdr-av" onclick="toggleProfile()" id="hdr-av-btn"><img src="${user.photoURL}" alt=""></div>`
     :`<button class="hdr-login" onclick="openLoginModal()"><i class="bi bi-google"></i> Sign in</button>`;
-  // profile popup data
-  if(user){
-    const pp=document.getElementById('profile-popup');
-    document.getElementById('pp-img').src=user.photoURL||'';
-    document.getElementById('pp-name-txt').textContent=user.displayName+(isAdmin?' [ADMIN]':'');
-    document.getElementById('pp-email-txt').textContent=user.email;
-    document.getElementById('pp-logout-btn').onclick=()=>{signOut(auth);closeProfile();};
-    loadUserStats(user.uid);
-    loadTransparency();
-  }
-  // sidebar
+  // Sidebar
   if(user){
     document.getElementById('sb-av').innerHTML=`<img src="${user.photoURL}" alt="">`;
     document.getElementById('sb-uinfo').innerHTML=`<div class="sb-uname">${user.displayName}${isAdmin?'<span class="admin-pill">ADMIN</span>':''}</div><div class="sb-uemail">${user.email}</div>`;
     document.getElementById('sb-footer').style.display='block';
     document.getElementById('btn-lo-sb').onclick=()=>signOut(auth);
     closeLoginModal();
+    // Profile popup
+    if(document.getElementById('pp-img')){
+      document.getElementById('pp-img').src=user.photoURL||'';
+      document.getElementById('pp-name-txt').textContent=user.displayName+(isAdmin?' [ADMIN]':'');
+      document.getElementById('pp-email-txt').textContent=user.email;
+      document.getElementById('pp-logout-btn').onclick=()=>{signOut(auth);closeProfile();};
+      loadUserStats(user.uid);
+    }
+    loadTransparency();
   }else{
     document.getElementById('sb-av').innerHTML='<i class="bi bi-person"></i>';
     document.getElementById('sb-uinfo').innerHTML='<button class="sb-login-btn" onclick="openLoginModal()"><i class="bi bi-google"></i> Sign in with Google</button>';
     document.getElementById('sb-footer').style.display='none';
   }
-  // update inputs
-  document.querySelectorAll('.ab-input').forEach(el=>{el.placeholder=user?'แสดงความคิดเห็น...':'Sign in เพื่อแสดงความคิดเห็น...';});
+  // Update comment inputs placeholder
+  document.querySelectorAll('.ab-input').forEach(el=>{
+    el.placeholder=user?'แสดงความคิดเห็น...':'Sign in เพื่อแสดงความคิดเห็น...';
+  });
+  // Update like buttons state from Firestore userLikes
+  if(user) restoreLikeState(user.uid);
 });
 
-// FETCH POSTS
-async function fetchPosts(){
+// ── RESTORE LIKE STATE from Firestore ──
+async function restoreLikeState(uid){
   try{
-    const q=query(collection(db,'posts'),orderBy('createdAt','desc'));
+    const q=query(collection(db,'userLikes'),where('userId','==',uid));
     const snap=await getDocs(q);
-    const target=document.getElementById('posts-target');
-    if(snap.empty){target.innerHTML='<p style="text-align:center;color:var(--muted);padding:3rem 0;">ยังไม่มีอัปเดตใหม่</p>';return;}
-    target.innerHTML='';
-    snap.forEach(ds=>{
-      const p=ds.data(),pid=ds.id;
-      const card=document.createElement('div');
-      card.className='post-card';
-      card.id='post-'+pid;
-      card.innerHTML=`
-        <div class="post-meta">
-          <span class="post-tag">${p.category||''}</span>
-          <span>•</span><span>${p.dateStr||''}</span>
-        </div>
-        <h3>${p.title||''}</h3>
-        <div class="post-content">${p.content||''}</div>
-        ${p.image&&p.image!=='null'?`<img src="${p.image}" class="post-img">`:''}
-        <div class="action-bar">
-          <button class="ab-like" id="abl-${pid}" onclick="handleLike('${pid}')">
-            <i class="bi bi-hand-thumbs-up"></i><span class="ab-cnt" id="lc-${pid}">${p.likes||0}</span>
-          </button>
-          <button class="ab-dislike" id="abd-${pid}" onclick="handleDislike('${pid}')">
-            <i class="bi bi-hand-thumbs-down"></i><span class="ab-cnt" id="dc-${pid}">${p.dislikes||0}</span>
-          </button>
-          <div class="ab-input-wrap">
-            <input class="ab-input" placeholder="${currentUser?'แสดงความคิดเห็น...':'Sign in เพื่อแสดงความคิดเห็น...'}"
-              onkeydown="if(event.key==='Enter'){event.preventDefault();quickSend('${pid}',this);}">
-            <button class="ab-send" onclick="quickSend('${pid}',this.previousElementSibling)"><i class="bi bi-send-fill"></i></button>
-          </div>
-          <button class="ab-comments" onclick="toggleComments('${pid}')">
-            <i class="bi bi-chat-square-dots"></i><span id="cc-${pid}">0</span>
-          </button>
-          <button class="ab-share" onclick="openShare('${(p.title||'').replace(/'/g,"\\'")}','${pid}')">
-            <i class="bi bi-share"></i>
-          </button>
-        </div>
-        <div class="comment-section" id="cs-${pid}">
-          <div class="c-list" id="cl-${pid}"><p class="c-empty">กำลังโหลด...</p></div>
-        </div>`;
-      target.appendChild(card);
-      listenComments(pid);
+    snap.forEach(d=>{
+      const data=d.data();
+      if(data.type==='post'){
+        const lb=document.getElementById('abl-'+data.targetId);
+        const db2=document.getElementById('abd-'+data.targetId);
+        if(data.vote===1&&lb)lb.classList.add('liked');
+        if(data.vote===-1&&db2)db2.classList.add('disliked');
+      }
     });
-  }catch(e){console.error(e);document.getElementById('posts-target').innerHTML='<p style="text-align:center;color:var(--muted);">โหลดไม่สำเร็จ</p>';}
+  }catch(e){}
 }
 
+// ── FETCH POSTS (one-time, fast) ──
+async function fetchPosts(){
+  const target=document.getElementById('posts-target');
+  // Show skeletons while loading
+  target.innerHTML=`
+    <div class="skel-card"><div class="skeleton skel-line" style="width:30%"></div><div class="skeleton skel-title"></div><div class="skeleton skel-para"></div><div class="skeleton skel-para"></div><div class="skeleton skel-img"></div><div class="skeleton skel-bar"></div></div>
+    <div class="skel-card"><div class="skeleton skel-line" style="width:25%"></div><div class="skeleton skel-title" style="width:50%"></div><div class="skeleton skel-para"></div><div class="skeleton skel-para"></div><div class="skeleton skel-bar"></div></div>`;
+
+  try{
+    const q=query(collection(db,'posts'),orderBy('createdAt','desc'));
+    // Real-time listener for posts too (auto-update when admin adds post)
+    onSnapshot(q,snap=>{
+      if(snap.empty){target.innerHTML='<p style="text-align:center;color:var(--muted);padding:3rem 0;">ยังไม่มีอัปเดตใหม่</p>';return;}
+      // Keep track of existing cards to avoid full re-render
+      const existingIds=new Set([...target.querySelectorAll('.post-card')].map(c=>c.id.replace('post-','')));
+      const newIds=new Set();
+      snap.forEach(ds=>{newIds.add(ds.id);});
+      // Full render only if posts changed
+      const changed=[...newIds].some(id=>!existingIds.has(id))||existingIds.size!==newIds.size;
+      if(!changed)return; // Only update counts, not re-render
+      target.innerHTML='';
+      snap.forEach(ds=>{
+        const p=ds.data(),pid=ds.id;
+        const card=document.createElement('div');
+        card.className='post-card';card.id='post-'+pid;
+        card.innerHTML=`
+          <div class="post-meta">
+            <span class="post-tag">${p.category||''}</span>
+            <span>•</span><span>${p.dateStr||''}</span>
+          </div>
+          <h3>${p.title||''}</h3>
+          <div class="post-content">${p.content||''}</div>
+          ${p.image&&p.image!=='null'?`<img src="${p.image}" class="post-img" loading="lazy">`:''}
+          <div class="action-bar">
+            <button class="ab-like" id="abl-${pid}" onclick="handleLike('${pid}')">
+              <i class="bi bi-hand-thumbs-up"></i><span class="ab-cnt" id="lc-${pid}">${Math.max(0,p.likes||0)}</span>
+            </button>
+            <button class="ab-dislike" id="abd-${pid}" onclick="handleDislike('${pid}')">
+              <i class="bi bi-hand-thumbs-down"></i><span class="ab-cnt" id="dc-${pid}">${Math.max(0,p.dislikes||0)}</span>
+            </button>
+            <div class="ab-input-wrap">
+              <input class="ab-input" placeholder="${currentUser?'แสดงความคิดเห็น...':'Sign in เพื่อแสดงความคิดเห็น...'}"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();quickSend('${pid}',this);}">
+              <button class="ab-send" onclick="quickSend('${pid}',this.previousElementSibling)"><i class="bi bi-send-fill"></i></button>
+            </div>
+            <button class="ab-comments" onclick="toggleComments('${pid}')">
+              <i class="bi bi-chat-square-dots"></i><span id="cc-${pid}">0</span>
+            </button>
+            <button class="ab-share" onclick="openShare('${(p.title||'').replace(/'/g,"\'").replace(/`/g,"'")}','${pid}')">
+              <i class="bi bi-share"></i>
+            </button>
+          </div>
+          <div class="comment-section" id="cs-${pid}">
+            <div class="c-list" id="cl-${pid}">
+              <div class="skel-card" style="padding:0.8rem;background:transparent;border:none;">
+                <div class="skeleton skel-line" style="width:40%;height:8px;"></div>
+                <div class="skeleton skel-para" style="height:8px;margin-top:6px;"></div>
+              </div>
+            </div>
+          </div>`;
+        target.appendChild(card);
+        listenComments(pid);
+      });
+      // Restore like state after render
+      if(currentUser)restoreLikeState(currentUser.uid);
+    },e=>{console.error(e);target.innerHTML='<p style="text-align:center;color:var(--muted);">โหลดไม่สำเร็จ</p>';});
+  }catch(e){console.error(e);}
+}
+
+// ── LISTEN COMMENTS (real-time, persistent) ──
 function listenComments(pid){
-  // Only top-level comments (no parentId)
   const q=query(collection(db,'comments'),where('postId','==',pid),where('parentId','==',''),orderBy('createdAt','asc'));
   onSnapshot(q,snap=>{
     const el=document.getElementById('cl-'+pid);if(!el)return;
     const cc=document.getElementById('cc-'+pid);if(cc)cc.textContent=snap.size;
-    if(snap.empty){el.innerHTML='<p class="c-empty">ยังไม่มีความคิดเห็น</p>';return;}
+    if(snap.empty){el.innerHTML='<p class="c-empty">ยังไม่มีความคิดเห็น — เป็นคนแรกได้เลย!</p>';return;}
     el.innerHTML='';
     snap.forEach(d=>{
       const c=d.data(),cid=d.id,isAdm=c.userEmail===ADMIN;
       const t=c.createdAt?relTime(c.createdAt.toDate()):'';
-      const clk=sessionStorage.getItem('clk_'+cid);
-      const cdk=sessionStorage.getItem('cdk_'+cid);
       const item=document.createElement('div');
-      item.className='c-item';
-      item.id='ci-'+cid;
+      item.className='c-item';item.id='ci-'+cid;
       item.innerHTML=`
         <div class="c-main-row">
-          <div class="c-av"><img src="${c.userPhoto||''}" onerror="this.style.display='none'"></div>
+          <div class="c-av"><img src="${c.userPhoto||''}" onerror="this.style.display='none'" loading="lazy"></div>
           <div class="c-body">
-            <div class="c-author">${c.userName}${isAdm?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${t}</span></div>
+            <div class="c-author">${esc(c.userName)}${isAdm?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${t}</span></div>
             <div class="c-text">${esc(c.text)}</div>
           </div>
         </div>
         <div class="c-actions">
-          <button class="c-action-btn ${clk?'c-liked':''}" onclick="likeComment('${cid}')">
-            <i class="bi bi-hand-thumbs-up"></i> <span id="clk-${cid}">${Math.max(0,c.likes||0)}</span>
+          <button class="c-action-btn" id="clb-${cid}" onclick="likeComment('${cid}','${pid}')">
+            <i class="bi bi-hand-thumbs-up"></i><span id="clk-${cid}">${Math.max(0,c.likes||0)}</span>
           </button>
-          <button class="c-action-btn ${cdk?'c-disliked':''}" onclick="dislikeComment('${cid}')">
-            <i class="bi bi-hand-thumbs-down"></i> <span id="cdk-${cid}">${Math.max(0,c.dislikes||0)}</span>
+          <button class="c-action-btn" id="cdb-${cid}" onclick="dislikeComment('${cid}','${pid}')">
+            <i class="bi bi-hand-thumbs-down"></i><span id="cdk-${cid}">${Math.max(0,c.dislikes||0)}</span>
           </button>
           <button class="c-action-btn c-reply-btn" onclick="toggleReplyInput('${cid}','${pid}')">
             <i class="bi bi-reply"></i> ตอบกลับ
           </button>
         </div>
         <div class="c-reply-input-wrap" id="ri-${cid}" style="display:none;">
-          <input class="c-reply-input" placeholder="ตอบกลับ ${c.userName}..." id="rit-${cid}"
-            onkeydown="if(event.key==='Enter'){sendReply('${cid}','${pid}',this);}">
+          <input class="c-reply-input" placeholder="ตอบกลับ ${esc(c.userName)}..." id="rit-${cid}"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();sendReply('${cid}','${pid}',this);}">
           <button class="c-reply-send" onclick="sendReply('${cid}','${pid}',document.getElementById('rit-${cid}'))"><i class="bi bi-send-fill"></i></button>
         </div>
         <div class="c-replies" id="rp-${cid}"></div>`;
       el.appendChild(item);
-      // Listen replies for this comment
-      listenReplies(cid, pid);
+      listenReplies(cid,pid);
     });
+    // Restore comment like state
+    if(currentUser)restoreCommentLikeState(currentUser.uid,pid);
   },e=>console.error(e));
 }
 
-function listenReplies(cid, pid){
+// ── LISTEN REPLIES ──
+function listenReplies(cid,pid){
   const q=query(collection(db,'comments'),where('postId','==',pid),where('parentId','==',cid),orderBy('createdAt','asc'));
   onSnapshot(q,snap=>{
     const el=document.getElementById('rp-'+cid);if(!el)return;
@@ -865,135 +947,246 @@ function listenReplies(cid, pid){
       item.className='c-item';
       item.innerHTML=`
         <div class="c-main-row">
-          <div class="c-av" style="width:22px;height:22px;flex-shrink:0;border-radius:50%;overflow:hidden;background:#18181b;border:1px solid var(--border);">
-            <img src="${c.userPhoto||''}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+          <div class="c-av" style="width:22px;height:22px;border-radius:50%;overflow:hidden;background:#18181b;border:1px solid var(--border);flex-shrink:0;">
+            <img src="${c.userPhoto||''}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" loading="lazy">
           </div>
           <div class="c-body">
-            <div class="c-author" style="font-size:0.75rem;">${c.userName}${isAdm?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${t}</span></div>
+            <div class="c-author" style="font-size:0.75rem;">${esc(c.userName)}${isAdm?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${t}</span></div>
             <div class="c-text" style="font-size:0.8rem;">${esc(c.text)}</div>
           </div>
-        </div>
-        <div class="c-actions">
-          <button class="c-action-btn" onclick="likeComment('${rid}')">
-            <i class="bi bi-hand-thumbs-up"></i> <span id="clk-${rid}">${Math.max(0,c.likes||0)}</span>
-          </button>
-          <button class="c-action-btn" onclick="dislikeComment('${rid}')">
-            <i class="bi bi-hand-thumbs-down"></i> <span id="cdk-${rid}">${Math.max(0,c.dislikes||0)}</span>
-          </button>
         </div>`;
       el.appendChild(item);
     });
   },e=>console.error(e));
 }
 
-// TOGGLE COMMENTS
+// ── RESTORE COMMENT LIKE STATE ──
+async function restoreCommentLikeState(uid,pid){
+  try{
+    const q=query(collection(db,'userLikes'),where('userId','==',uid),where('postId','==',pid),where('type','==','comment'));
+    const snap=await getDocs(q);
+    snap.forEach(d=>{
+      const data=d.data();
+      const lb=document.getElementById('clb-'+data.targetId);
+      const db2=document.getElementById('cdb-'+data.targetId);
+      if(data.vote===1&&lb)lb.classList.add('c-liked');
+      if(data.vote===-1&&db2)db2.classList.add('c-disliked');
+    });
+  }catch(e){}
+}
+
+// ── TOGGLE COMMENTS ──
 window.toggleComments=function(pid){
   const cs=document.getElementById('cs-'+pid);
   cs.classList.toggle('open');
 };
 
-// LIKE — fixed: ensure field exists, never go negative
-window.handleLike=async function(pid){
+// ── TOGGLE REPLY INPUT ──
+window.toggleReplyInput=function(cid,pid){
   if(!currentUser){openLoginModal();return;}
-  const key='lk_'+pid,dkey='dk_'+pid;
-  const ref=doc(db,'posts',pid);
-  const snap=await getDoc(ref);
-  const data=snap.data()||{};
-  // Initialize fields if missing
-  const curLikes=typeof data.likes==='number'?Math.max(0,data.likes):0;
-  const curDislikes=typeof data.dislikes==='number'?Math.max(0,data.dislikes):0;
-  const liked=sessionStorage.getItem(key);
-  if(liked){
-    await updateDoc(ref,{likes:Math.max(0,curLikes-1)});
-    sessionStorage.removeItem(key);
-    document.getElementById('abl-'+pid).classList.remove('liked');
-  }else{
-    const updates={likes:curLikes+1};
-    if(sessionStorage.getItem(dkey)){
-      updates.dislikes=Math.max(0,curDislikes-1);
-      sessionStorage.removeItem(dkey);
-      document.getElementById('abd-'+pid).classList.remove('disliked');
-    }
-    await updateDoc(ref,updates);
-    sessionStorage.setItem(key,'1');
-    document.getElementById('abl-'+pid).classList.add('liked');
-  }
-  const s2=await getDoc(ref);const d2=s2.data()||{};
-  document.getElementById('lc-'+pid).textContent=Math.max(0,d2.likes||0);
-  document.getElementById('dc-'+pid).textContent=Math.max(0,d2.dislikes||0);
+  const wrap=document.getElementById('ri-'+cid);if(!wrap)return;
+  const isOpen=wrap.style.display!=='none';
+  wrap.style.display=isOpen?'none':'flex';
+  if(!isOpen)setTimeout(()=>document.getElementById('rit-'+cid)?.focus(),50);
 };
 
-// DISLIKE
-window.handleDislike=async function(pid){
-  if(!currentUser){openLoginModal();return;}
-  const key='dk_'+pid,lkey='lk_'+pid;
-  const ref=doc(db,'posts',pid);
-  const snap=await getDoc(ref);
-  const data=snap.data()||{};
-  const curLikes=Math.max(0,data.likes||0);
-  const curDislikes=Math.max(0,data.dislikes||0);
-  const disliked=sessionStorage.getItem(key);
-  if(disliked){
-    await updateDoc(ref,{dislikes:Math.max(0,curDislikes-1)});
-    sessionStorage.removeItem(key);
-    document.getElementById('abd-'+pid).classList.remove('disliked');
-  }else{
-    const updates={dislikes:curDislikes+1};
-    if(sessionStorage.getItem(lkey)){
-      updates.likes=Math.max(0,curLikes-1);
-      sessionStorage.removeItem(lkey);
-      document.getElementById('abl-'+pid).classList.remove('liked');
-    }
-    await updateDoc(ref,updates);
-    sessionStorage.setItem(key,'1');
-    document.getElementById('abd-'+pid).classList.add('disliked');
-  }
-  const s2=await getDoc(ref);const d2=s2.data()||{};
-  document.getElementById('lc-'+pid).textContent=Math.max(0,d2.likes||0);
-  document.getElementById('dc-'+pid).textContent=Math.max(0,d2.dislikes||0);
-};
-
-// QUICK SEND
+// ── QUICK SEND (optimistic) ──
 window.quickSend=async function(pid,input){
   if(!currentUser){openLoginModal();return;}
   const text=input.value.trim();if(!text)return;
-  input.value='';input.disabled=true;
+  // Optimistic: clear input immediately
+  input.value='';input.style.height='auto';
+  // Open comments
+  const cs=document.getElementById('cs-'+pid);
+  if(cs&&!cs.classList.contains('open'))cs.classList.add('open');
+  // Show "sending" placeholder optimistically
+  const cl=document.getElementById('cl-'+pid);
+  if(cl){
+    const ghost=document.createElement('div');
+    ghost.className='c-item';ghost.id='ghost-send';
+    ghost.innerHTML=`<div class="c-main-row"><div class="c-av"><img src="${currentUser.photoURL||''}" onerror="this.style.display='none'"></div><div class="c-body"><div class="c-author" style="color:var(--muted);">${esc(currentUser.displayName)}<span class="c-time">กำลังส่ง...</span></div><div class="c-text" style="color:var(--muted);">${esc(text)}</div></div></div>`;
+    cl.appendChild(ghost);
+  }
   try{
-    await addDoc(collection(db,'comments'),{postId:pid,parentId:'',text,userId:currentUser.uid,userName:currentUser.displayName,userEmail:currentUser.email,userPhoto:currentUser.photoURL||'',createdAt:serverTimestamp(),likes:0,dislikes:0});
-    const cs=document.getElementById('cs-'+pid);
-    if(!cs.classList.contains('open'))cs.classList.add('open');
-  }catch(e){console.error(e);}
-  finally{input.disabled=false;}
+    await addDoc(collection(db,'comments'),{
+      postId:pid,parentId:'',text,
+      userId:currentUser.uid,userName:currentUser.displayName,
+      userEmail:currentUser.email,userPhoto:currentUser.photoURL||'',
+      createdAt:serverTimestamp(),likes:0,dislikes:0
+    });
+    // Ghost will be replaced by onSnapshot automatically
+    const g=document.getElementById('ghost-send');if(g)g.remove();
+  }catch(e){
+    console.error(e);
+    const g=document.getElementById('ghost-send');
+    if(g){g.querySelector('.c-time').textContent='ส่งไม่สำเร็จ';g.style.opacity='0.4';}
+  }
 };
 
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function relTime(d){const s=Math.floor((Date.now()-d)/1000);if(s<60)return'เมื่อกี้';if(s<3600)return Math.floor(s/60)+' นาทีที่แล้ว';if(s<86400)return Math.floor(s/3600)+' ชม.ที่แล้ว';return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});}
+// ── SEND REPLY (optimistic) ──
+window.sendReply=async function(parentId,pid,input){
+  if(!currentUser){openLoginModal();return;}
+  const text=input.value.trim();if(!text)return;
+  input.value='';
+  const wrap=document.getElementById('ri-'+parentId);if(wrap)wrap.style.display='none';
+  try{
+    await addDoc(collection(db,'comments'),{
+      postId:pid,parentId:parentId,text,
+      userId:currentUser.uid,userName:currentUser.displayName,
+      userEmail:currentUser.email,userPhoto:currentUser.photoURL||'',
+      createdAt:serverTimestamp(),likes:0,dislikes:0
+    });
+  }catch(e){console.error(e);}
+};
 
-fetchPosts();
+// ── LIKE POST (Firestore-persistent, optimistic UI) ──
+window.handleLike=async function(pid){
+  if(!currentUser){openLoginModal();return;}
+  const uid=currentUser.uid;
+  const likeRef=doc(db,'userLikes',uid+'_post_'+pid);
+  const postRef=doc(db,'posts',pid);
+  const lb=document.getElementById('abl-'+pid);
+  const db2=document.getElementById('abd-'+pid);
+  const lc=document.getElementById('lc-'+pid);
+  const dc=document.getElementById('dc-'+pid);
+  const snap=await getDoc(likeRef);
+  const cur=snap.exists()?snap.data().vote:0;
+  // Optimistic update
+  let lDelta=0,dDelta=0;
+  if(cur===1){
+    // Unlike
+    lDelta=-1;
+    await setDoc(likeRef,{userId:uid,targetId:pid,type:'post',vote:0,postId:pid},{merge:true});
+    lb.classList.remove('liked');
+  }else{
+    if(cur===-1){dDelta=-1;db2.classList.remove('disliked');}
+    lDelta=1;
+    await setDoc(likeRef,{userId:uid,targetId:pid,type:'post',vote:1,postId:pid},{merge:true});
+    lb.classList.add('liked');
+  }
+  // Update counters optimistically
+  if(lc)lc.textContent=Math.max(0,(parseInt(lc.textContent)||0)+lDelta);
+  if(dc)dc.textContent=Math.max(0,(parseInt(dc.textContent)||0)+dDelta);
+  // Sync to Firestore
+  const updates={};
+  if(lDelta!==0)updates.likes=increment(lDelta);
+  if(dDelta!==0)updates.dislikes=increment(dDelta);
+  if(Object.keys(updates).length>0){
+    try{await updateDoc(postRef,updates);}
+    catch{
+      // If field doesn't exist, set it
+      await setDoc(postRef,{likes:Math.max(0,(parseInt(lc?.textContent)||0)),dislikes:Math.max(0,(parseInt(dc?.textContent)||0))},{merge:true});
+    }
+  }
+};
 
-// LOAD USER STATS (likes/comments count from sessionStorage + Firestore)
+// ── DISLIKE POST ──
+window.handleDislike=async function(pid){
+  if(!currentUser){openLoginModal();return;}
+  const uid=currentUser.uid;
+  const likeRef=doc(db,'userLikes',uid+'_post_'+pid);
+  const postRef=doc(db,'posts',pid);
+  const lb=document.getElementById('abl-'+pid);
+  const db2=document.getElementById('abd-'+pid);
+  const lc=document.getElementById('lc-'+pid);
+  const dc=document.getElementById('dc-'+pid);
+  const snap=await getDoc(likeRef);
+  const cur=snap.exists()?snap.data().vote:0;
+  let lDelta=0,dDelta=0;
+  if(cur===-1){
+    dDelta=-1;
+    await setDoc(likeRef,{userId:uid,targetId:pid,type:'post',vote:0,postId:pid},{merge:true});
+    db2.classList.remove('disliked');
+  }else{
+    if(cur===1){lDelta=-1;lb.classList.remove('liked');}
+    dDelta=1;
+    await setDoc(likeRef,{userId:uid,targetId:pid,type:'post',vote:-1,postId:pid},{merge:true});
+    db2.classList.add('disliked');
+  }
+  if(lc)lc.textContent=Math.max(0,(parseInt(lc.textContent)||0)+lDelta);
+  if(dc)dc.textContent=Math.max(0,(parseInt(dc.textContent)||0)+dDelta);
+  const updates={};
+  if(lDelta!==0)updates.likes=increment(lDelta);
+  if(dDelta!==0)updates.dislikes=increment(dDelta);
+  if(Object.keys(updates).length>0){
+    try{await updateDoc(postRef,updates);}
+    catch{await setDoc(postRef,{likes:Math.max(0,(parseInt(lc?.textContent)||0)),dislikes:Math.max(0,(parseInt(dc?.textContent)||0))},{merge:true});}
+  }
+};
+
+// ── LIKE COMMENT ──
+window.likeComment=async function(cid,pid){
+  if(!currentUser){openLoginModal();return;}
+  const uid=currentUser.uid;
+  const likeRef=doc(db,'userLikes',uid+'_comment_'+cid);
+  const cRef=doc(db,'comments',cid);
+  const lb=document.getElementById('clb-'+cid);
+  const dbt=document.getElementById('cdb-'+cid);
+  const lc=document.getElementById('clk-'+cid);
+  const snap=await getDoc(likeRef);
+  const cur=snap.exists()?snap.data().vote:0;
+  let lDelta=0,dDelta=0;
+  if(cur===1){
+    lDelta=-1;
+    await setDoc(likeRef,{userId:uid,targetId:cid,type:'comment',vote:0,postId:pid},{merge:true});
+    lb?.classList.remove('c-liked');
+  }else{
+    if(cur===-1){dDelta=-1;dbt?.classList.remove('c-disliked');}
+    lDelta=1;
+    await setDoc(likeRef,{userId:uid,targetId:cid,type:'comment',vote:1,postId:pid},{merge:true});
+    lb?.classList.add('c-liked');
+  }
+  if(lc)lc.textContent=Math.max(0,(parseInt(lc.textContent)||0)+lDelta);
+  if(Object.keys({lDelta,dDelta}).some(k=>({lDelta,dDelta})[k]!==0)){
+    try{const u={};if(lDelta)u.likes=increment(lDelta);if(dDelta)u.dislikes=increment(dDelta);await updateDoc(cRef,u);}catch(e){}
+  }
+};
+
+// ── DISLIKE COMMENT ──
+window.dislikeComment=async function(cid,pid){
+  if(!currentUser){openLoginModal();return;}
+  const uid=currentUser.uid;
+  const likeRef=doc(db,'userLikes',uid+'_comment_'+cid);
+  const cRef=doc(db,'comments',cid);
+  const lb=document.getElementById('clb-'+cid);
+  const dbt=document.getElementById('cdb-'+cid);
+  const dc=document.getElementById('cdk-'+cid);
+  const snap=await getDoc(likeRef);
+  const cur=snap.exists()?snap.data().vote:0;
+  let lDelta=0,dDelta=0;
+  if(cur===-1){
+    dDelta=-1;
+    await setDoc(likeRef,{userId:uid,targetId:cid,type:'comment',vote:0,postId:pid},{merge:true});
+    dbt?.classList.remove('c-disliked');
+  }else{
+    if(cur===1){lDelta=-1;lb?.classList.remove('c-liked');}
+    dDelta=1;
+    await setDoc(likeRef,{userId:uid,targetId:cid,type:'comment',vote:-1,postId:pid},{merge:true});
+    dbt?.classList.add('c-disliked');
+  }
+  if(dc)dc.textContent=Math.max(0,(parseInt(dc.textContent)||0)+dDelta);
+  try{const u={};if(lDelta)u.likes=increment(lDelta);if(dDelta)u.dislikes=increment(dDelta);await updateDoc(cRef,u);}catch(e){}
+};
+
+// ── LOAD USER STATS ──
 async function loadUserStats(uid){
   try{
-    // count comments by user
-    const cq=query(collection(db,'comments'),where('userId','==',uid));
-    const csnap=await getDocs(cq);
-    document.getElementById('pp-comments').textContent=csnap.size;
-    // count support amount
+    const cq=query(collection(db,'comments'),where('userId','==',uid),limit(50));
+    const cs=await getDocs(cq);
+    if(document.getElementById('pp-comments'))document.getElementById('pp-comments').textContent=cs.size;
+    const lq=query(collection(db,'userLikes'),where('userId','==',uid),where('vote','==',1));
+    const ls=await getDocs(lq);
+    if(document.getElementById('pp-likes'))document.getElementById('pp-likes').textContent=ls.size;
     const sq=query(collection(db,'supporters'),where('userId','==',uid));
-    const ssnap=await getDocs(sq);
-    let total=0;ssnap.forEach(d=>{total+=(d.data().amount||0);});
-    document.getElementById('pp-support-amt').textContent=total.toLocaleString();
-    // likes from session (approximate)
-    let likeCount=0;
-    for(let k in sessionStorage){if(k.startsWith('lk_'))likeCount++;}
-    document.getElementById('pp-likes').textContent=likeCount;
-  }catch(e){console.error(e);}
+    const ss=await getDocs(sq);
+    let total=0;ss.forEach(d=>{total+=(d.data().amount||0);});
+    if(document.getElementById('pp-support-amt'))document.getElementById('pp-support-amt').textContent=total.toLocaleString();
+  }catch(e){}
 }
 
-// LOAD TRANSPARENCY DATA
+// ── LOAD TRANSPARENCY ──
 async function loadTransparency(){
   try{
-    // transactions
     const tq=query(collection(db,'transactions'),orderBy('date','desc'));
     const tsnap=await getDocs(tq);
     let income=0,expense=0;
@@ -1009,30 +1202,39 @@ async function loadTransparency(){
         tbody.appendChild(tr);
       });
     }
-    const inc=document.getElementById('total-income');
-    const exp=document.getElementById('total-expense');
-    const bal=document.getElementById('total-balance');
+    const inc=document.getElementById('total-income');const exp=document.getElementById('total-expense');const bal=document.getElementById('total-balance');
     if(inc)inc.textContent='฿'+income.toLocaleString();
     if(exp)exp.textContent='฿'+expense.toLocaleString();
     if(bal){bal.textContent='฿'+(income-expense).toLocaleString();bal.style.color=(income-expense)>=0?'#4ade80':'#f87171';}
-    // supporters
     const sq=query(collection(db,'supporters'),orderBy('amount','desc'));
     const ssnap=await getDocs(sq);
-    const supp=document.getElementById('total-supporters');
-    if(supp)supp.textContent=ssnap.size;
+    const supp=document.getElementById('total-supporters');if(supp)supp.textContent=ssnap.size;
     const hof=document.getElementById('hof-grid');
     if(hof&&!ssnap.empty){
       hof.innerHTML='';
       ssnap.forEach(d=>{
-        const s=d.data();
-        if(!s.showName)return;
+        const s=d.data();if(!s.showName)return;
         const item=document.createElement('div');item.className='hof-item';
         item.innerHTML=`<div class="hof-av">${s.photoURL?`<img src="${s.photoURL}" style="width:100%;height:100%;object-fit:cover;">`:'<i class="bi bi-person"></i>'}</div><div class="hof-name">${s.name||'Anonymous'}</div><div class="hof-amt">฿${(s.amount||0).toLocaleString()}</div>`;
         hof.appendChild(item);
       });
     }
-  }catch(e){console.error(e);}
+  }catch(e){}
 }
+
+// ── HELPERS ──
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function relTime(d){
+  const s=Math.floor((Date.now()-d)/1000);
+  if(s<10)return'เมื่อกี้';
+  if(s<60)return s+'วิที่แล้ว';
+  if(s<3600)return Math.floor(s/60)+' นาทีที่แล้ว';
+  if(s<86400)return Math.floor(s/3600)+' ชม.ที่แล้ว';
+  if(s<604800)return Math.floor(s/86400)+' วันที่แล้ว';
+  return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
+}
+
+fetchPosts();
 </script>
 
 <!-- MASCOT ANIMATION OVERLAY -->
