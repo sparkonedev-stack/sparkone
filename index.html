@@ -726,6 +726,22 @@ onAuthStateChanged(auth, user => {
   }
 });
 
+// Expand comments (called when clicking input in overlay)
+window.expandComments = function(pid, inputEl) {
+  const cs = document.getElementById('cs-' + pid);
+  const chevron = document.getElementById('chevron-' + pid);
+  if (!cs.classList.contains('expanded')) {
+    cs.classList.add('expanded');
+    chevron.style.transform = 'rotate(180deg)';
+  }
+  // focus real textarea
+  setTimeout(() => {
+    const ta = document.querySelector('#cs-' + pid + ' .c-in');
+    if (ta) { ta.focus(); }
+    inputEl.blur();
+  }, 50);
+};
+
 // Toggle comments
 window.toggleComments = function(pid) {
   const cs = document.getElementById('cs-' + pid);
