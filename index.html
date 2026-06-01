@@ -146,18 +146,18 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
 /* SHARE MODAL */
 .share-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:150;display:none;align-items:flex-end;justify-content:center;padding:0;}
 .share-modal-bg.open{display:flex;}
-.share-box{background:#0f0f12;border:1px solid var(--border);border-radius:16px 16px 0 0;width:100%;max-width:540px;padding:1.4rem 1.4rem 2rem;animation:slideUp 0.25s cubic-bezier(0.16,1,0.3,1);}
+.share-box{background:rgba(8,8,12,0.96);border:1px solid rgba(255,255,255,0.07);border-radius:20px 20px 0 0;width:100%;max-width:540px;padding:1.4rem 1.4rem 2rem;animation:slideUp 0.25s cubic-bezier(0.16,1,0.3,1);}
 @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
-.share-title{font-size:0.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between;}
-.share-close{background:transparent;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;}
+.share-title{font-size:0.82rem;color:#52525b;text-transform:uppercase;letter-spacing:1px;margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between;}
+.share-close{background:rgba(255,255,255,0.06);border:none;color:var(--muted);font-size:0.9rem;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
 .share-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.share-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 8px;cursor:pointer;transition:border-color 0.2s;text-decoration:none;color:var(--text);}
-.share-btn:hover{border-color:#52525b;}
+.share-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px 8px;cursor:pointer;transition:all 0.15s;text-decoration:none;color:var(--text);}
+.share-btn:hover{border-color:rgba(167,139,250,0.5);background:rgba(167,139,250,0.08);}
 .share-btn i{font-size:1.4rem;}
 .share-btn span{font-size:0.7rem;color:var(--muted);}
-.share-copy{display:flex;align-items:center;gap:8px;margin-top:12px;background:#18181b;border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+.share-copy{display:flex;align-items:center;gap:8px;margin-top:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:8px 10px;}
 .share-url{flex:1;font-size:0.78rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.share-copy-btn{background:rgba(255,255,255,0.08);border:1px solid var(--border);color:var(--accent);padding:4px 10px;border-radius:6px;font-size:0.75rem;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.share-copy-btn{background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.25);color:#a78bfa;padding:4px 10px;border-radius:6px;font-size:0.75rem;cursor:pointer;white-space:nowrap;flex-shrink:0;}
 .share-copy-btn:hover{background:rgba(255,255,255,0.14);}
 
 /* PROJECTS */
@@ -419,25 +419,7 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
 .admin-reply-preview .c-author { font-size: 0.75rem; }
 .admin-reply-preview .c-text { font-size: 0.8rem; }
 
-/* SHARE UI — dark theme */
-.share-modal-bg { background: rgba(0,0,0,0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
-.share-box {
-  background: rgba(10,10,14,0.95) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  border-radius: 20px 20px 0 0 !important;
-}
-.share-title { color: #71717a !important; }
-.share-btn {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  color: var(--text) !important;
-  transition: border-color 0.15s, background 0.15s !important;
-}
-.share-btn:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.2) !important; }
-.share-btn span { color: #71717a !important; font-size: 0.68rem !important; }
-.share-copy { background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.08) !important; }
-.share-url { color: #52525b !important; }
-.share-copy-btn { background: rgba(167,139,250,0.15) !important; border-color: rgba(167,139,250,0.3) !important; color: #a78bfa !important; }
+
 /* scrollbar */
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
