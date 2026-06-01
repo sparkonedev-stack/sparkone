@@ -846,7 +846,15 @@ let currentUser=null;
 
 // ── AUTH ──
 document.getElementById('google-login-btn').onclick=async()=>{
-  try{await setPersistence(auth,browserLocalPersistence);await signInWithPopup(auth,provider);}catch(e){console.error(e);}
+  try{
+    await setPersistence(auth,browserLocalPersistence);
+    const result=await signInWithPopup(auth,provider);
+    if(result.user){
+      closeLoginModal();
+      // Force reload so all rendered UI (comment inputs, like state) syncs correctly
+      setTimeout(()=>window.location.reload(),300);
+    }
+  }catch(e){console.error(e);}
 };
 
 onAuthStateChanged(auth,user=>{
