@@ -322,6 +322,22 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
 .confetti{position:absolute;width:8px;height:8px;border-radius:50%;animation:fall linear forwards;}
 @keyframes fall{from{transform:translateY(-20px) rotate(0deg);opacity:1;}to{transform:translateY(220px) rotate(720deg);opacity:0;}}
 
+
+/* COMMENT REPLY SYSTEM */
+.c-item { display: flex; gap: 8px; flex-direction: column; }
+.c-main-row { display: flex; gap: 8px; }
+.c-actions { display: flex; align-items: center; gap: 8px; margin-left: 35px; margin-top: 2px; }
+.c-action-btn { background: transparent; border: none; color: var(--muted); font-size: 0.72rem; cursor: pointer; padding: 2px 4px; border-radius: 4px; display: flex; align-items: center; gap: 3px; font-family: inherit; transition: color 0.15s; }
+.c-action-btn:hover { color: var(--accent); }
+.c-action-btn.c-liked { color: #4ade80; }
+.c-action-btn.c-disliked { color: #f87171; }
+.c-reply-btn { color: #a78bfa; }
+.c-reply-btn:hover { color: #c4b5fd; }
+.c-replies { margin-left: 35px; margin-top: 6px; display: flex; flex-direction: column; gap: 8px; border-left: 2px solid #27272a; padding-left: 12px; }
+.c-reply-input-wrap { display: flex; gap: 6px; margin-left: 35px; margin-top: 6px; align-items: center; }
+.c-reply-input { flex: 1; background: #18181b; border: 1px solid var(--border); border-radius: 8px; padding: 5px 9px; color: var(--text); font-size: 0.8rem; font-family: inherit; outline: none; }
+.c-reply-input:focus { border-color: #52525b; }
+.c-reply-send { background: transparent; border: none; color: #a78bfa; cursor: pointer; font-size: 0.9rem; padding: 2px; }
 /* scrollbar */
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -790,18 +806,81 @@ async function fetchPosts(){
 }
 
 function listenComments(pid){
-  const q=query(collection(db,'comments'),where('postId','==',pid),orderBy('createdAt','asc'));
+  // Only top-level comments (no parentId)
+  const q=query(collection(db,'comments'),where('postId','==',pid),where('parentId','==',''),orderBy('createdAt','asc'));
   onSnapshot(q,snap=>{
     const el=document.getElementById('cl-'+pid);if(!el)return;
     const cc=document.getElementById('cc-'+pid);if(cc)cc.textContent=snap.size;
     if(snap.empty){el.innerHTML='<p class="c-empty">ยังไม่มีความคิดเห็น</p>';return;}
     el.innerHTML='';
     snap.forEach(d=>{
-      const c=d.data(),isAdm=c.userEmail===ADMIN;
+      const c=d.data(),cid=d.id,isAdm=c.userEmail===ADMIN;
+      const t=c.createdAt?relTime(c.createdAt.toDate()):'';
+      const clk=sessionStorage.getItem('clk_'+cid);
+      const cdk=sessionStorage.getItem('cdk_'+cid);
+      const item=document.createElement('div');
+      item.className='c-item';
+      item.id='ci-'+cid;
+      item.innerHTML=`
+        <div class="c-main-row">
+          <div class="c-av"><img src="${c.userPhoto||''}" onerror="this.style.display='none'"></div>
+          <div class="c-body">
+            <div class="c-author">${c.userName}${isAdm?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${t}</span></div>
+            <div class="c-text">${esc(c.text)}</div>
+          </div>
+        </div>
+        <div class="c-actions">
+          <button class="c-action-btn ${clk?'c-liked':''}" onclick="likeComment('${cid}')">
+            <i class="bi bi-hand-thumbs-up"></i> <span id="clk-${cid}">${Math.max(0,c.likes||0)}</span>
+          </button>
+          <button class="c-action-btn ${cdk?'c-disliked':''}" onclick="dislikeComment('${cid}')">
+            <i class="bi bi-hand-thumbs-down"></i> <span id="cdk-${cid}">${Math.max(0,c.dislikes||0)}</span>
+          </button>
+          <button class="c-action-btn c-reply-btn" onclick="toggleReplyInput('${cid}','${pid}')">
+            <i class="bi bi-reply"></i> ตอบกลับ
+          </button>
+        </div>
+        <div class="c-reply-input-wrap" id="ri-${cid}" style="display:none;">
+          <input class="c-reply-input" placeholder="ตอบกลับ ${c.userName}..." id="rit-${cid}"
+            onkeydown="if(event.key==='Enter'){sendReply('${cid}','${pid}',this);}">
+          <button class="c-reply-send" onclick="sendReply('${cid}','${pid}',document.getElementById('rit-${cid}'))"><i class="bi bi-send-fill"></i></button>
+        </div>
+        <div class="c-replies" id="rp-${cid}"></div>`;
+      el.appendChild(item);
+      // Listen replies for this comment
+      listenReplies(cid, pid);
+    });
+  },e=>console.error(e));
+}
+
+function listenReplies(cid, pid){
+  const q=query(collection(db,'comments'),where('postId','==',pid),where('parentId','==',cid),orderBy('createdAt','asc'));
+  onSnapshot(q,snap=>{
+    const el=document.getElementById('rp-'+cid);if(!el)return;
+    el.innerHTML='';
+    snap.forEach(d=>{
+      const c=d.data(),rid=d.id,isAdm=c.userEmail===ADMIN;
       const t=c.createdAt?relTime(c.createdAt.toDate()):'';
       const item=document.createElement('div');
       item.className='c-item';
-      item.innerHTML=`<div class="c-av"><img src="${c.userPhoto||''}" onerror="this.style.display='none'"></div><div class="c-body"><div class="c-author">${c.userName}${isAdm?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${t}</span></div><div class="c-text">${esc(c.text)}</div></div>`;
+      item.innerHTML=`
+        <div class="c-main-row">
+          <div class="c-av" style="width:22px;height:22px;flex-shrink:0;border-radius:50%;overflow:hidden;background:#18181b;border:1px solid var(--border);">
+            <img src="${c.userPhoto||''}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+          </div>
+          <div class="c-body">
+            <div class="c-author" style="font-size:0.75rem;">${c.userName}${isAdm?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${t}</span></div>
+            <div class="c-text" style="font-size:0.8rem;">${esc(c.text)}</div>
+          </div>
+        </div>
+        <div class="c-actions">
+          <button class="c-action-btn" onclick="likeComment('${rid}')">
+            <i class="bi bi-hand-thumbs-up"></i> <span id="clk-${rid}">${Math.max(0,c.likes||0)}</span>
+          </button>
+          <button class="c-action-btn" onclick="dislikeComment('${rid}')">
+            <i class="bi bi-hand-thumbs-down"></i> <span id="cdk-${rid}">${Math.max(0,c.dislikes||0)}</span>
+          </button>
+        </div>`;
       el.appendChild(item);
     });
   },e=>console.error(e));
@@ -813,26 +892,35 @@ window.toggleComments=function(pid){
   cs.classList.toggle('open');
 };
 
-// LIKE
+// LIKE — fixed: ensure field exists, never go negative
 window.handleLike=async function(pid){
   if(!currentUser){openLoginModal();return;}
   const key='lk_'+pid,dkey='dk_'+pid;
   const ref=doc(db,'posts',pid);
+  const snap=await getDoc(ref);
+  const data=snap.data()||{};
+  // Initialize fields if missing
+  const curLikes=typeof data.likes==='number'?Math.max(0,data.likes):0;
+  const curDislikes=typeof data.dislikes==='number'?Math.max(0,data.dislikes):0;
   const liked=sessionStorage.getItem(key);
   if(liked){
-    await updateDoc(ref,{likes:increment(-1)});
+    await updateDoc(ref,{likes:Math.max(0,curLikes-1)});
     sessionStorage.removeItem(key);
     document.getElementById('abl-'+pid).classList.remove('liked');
   }else{
-    const updates={likes:increment(1)};
-    if(sessionStorage.getItem(dkey)){updates.dislikes=increment(-1);sessionStorage.removeItem(dkey);document.getElementById('abd-'+pid).classList.remove('disliked');}
+    const updates={likes:curLikes+1};
+    if(sessionStorage.getItem(dkey)){
+      updates.dislikes=Math.max(0,curDislikes-1);
+      sessionStorage.removeItem(dkey);
+      document.getElementById('abd-'+pid).classList.remove('disliked');
+    }
     await updateDoc(ref,updates);
     sessionStorage.setItem(key,'1');
     document.getElementById('abl-'+pid).classList.add('liked');
   }
-  const s=await getDoc(ref);const d=s.data();
-  document.getElementById('lc-'+pid).textContent=Math.max(0,d.likes||0);
-  document.getElementById('dc-'+pid).textContent=Math.max(0,d.dislikes||0);
+  const s2=await getDoc(ref);const d2=s2.data()||{};
+  document.getElementById('lc-'+pid).textContent=Math.max(0,d2.likes||0);
+  document.getElementById('dc-'+pid).textContent=Math.max(0,d2.dislikes||0);
 };
 
 // DISLIKE
@@ -840,21 +928,29 @@ window.handleDislike=async function(pid){
   if(!currentUser){openLoginModal();return;}
   const key='dk_'+pid,lkey='lk_'+pid;
   const ref=doc(db,'posts',pid);
+  const snap=await getDoc(ref);
+  const data=snap.data()||{};
+  const curLikes=Math.max(0,data.likes||0);
+  const curDislikes=Math.max(0,data.dislikes||0);
   const disliked=sessionStorage.getItem(key);
   if(disliked){
-    await updateDoc(ref,{dislikes:increment(-1)});
+    await updateDoc(ref,{dislikes:Math.max(0,curDislikes-1)});
     sessionStorage.removeItem(key);
     document.getElementById('abd-'+pid).classList.remove('disliked');
   }else{
-    const updates={dislikes:increment(1)};
-    if(sessionStorage.getItem(lkey)){updates.likes=increment(-1);sessionStorage.removeItem(lkey);document.getElementById('abl-'+pid).classList.remove('liked');}
+    const updates={dislikes:curDislikes+1};
+    if(sessionStorage.getItem(lkey)){
+      updates.likes=Math.max(0,curLikes-1);
+      sessionStorage.removeItem(lkey);
+      document.getElementById('abl-'+pid).classList.remove('liked');
+    }
     await updateDoc(ref,updates);
     sessionStorage.setItem(key,'1');
     document.getElementById('abd-'+pid).classList.add('disliked');
   }
-  const s=await getDoc(ref);const d=s.data();
-  document.getElementById('lc-'+pid).textContent=Math.max(0,d.likes||0);
-  document.getElementById('dc-'+pid).textContent=Math.max(0,d.dislikes||0);
+  const s2=await getDoc(ref);const d2=s2.data()||{};
+  document.getElementById('lc-'+pid).textContent=Math.max(0,d2.likes||0);
+  document.getElementById('dc-'+pid).textContent=Math.max(0,d2.dislikes||0);
 };
 
 // QUICK SEND
@@ -863,7 +959,7 @@ window.quickSend=async function(pid,input){
   const text=input.value.trim();if(!text)return;
   input.value='';input.disabled=true;
   try{
-    await addDoc(collection(db,'comments'),{postId:pid,text,userId:currentUser.uid,userName:currentUser.displayName,userEmail:currentUser.email,userPhoto:currentUser.photoURL||'',createdAt:serverTimestamp()});
+    await addDoc(collection(db,'comments'),{postId:pid,parentId:'',text,userId:currentUser.uid,userName:currentUser.displayName,userEmail:currentUser.email,userPhoto:currentUser.photoURL||'',createdAt:serverTimestamp(),likes:0,dislikes:0});
     const cs=document.getElementById('cs-'+pid);
     if(!cs.classList.contains('open'))cs.classList.add('open');
   }catch(e){console.error(e);}
