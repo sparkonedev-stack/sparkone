@@ -51,7 +51,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
 }
-.sidebar-logo { height: 32px; object-fit: contain; filter: brightness(10); }
+.sidebar-logo { height: 44px; object-fit: contain; filter: brightness(0) invert(1); }
 .sidebar-close {
   background: transparent; border: none; color: var(--muted);
   font-size: 1.1rem; cursor: pointer; width: 28px; height: 28px;
@@ -122,7 +122,7 @@ header {
   border-radius: 8px; display: flex; align-items: center; justify-content: center;
 }
 .menu-btn:hover { background: var(--border); }
-.header-logo { height: 36px; object-fit: contain; filter: brightness(10); }
+.header-logo { height: 44px; object-fit: contain; filter: brightness(0) invert(1); }
 .header-user-avatar {
   width: 32px; height: 32px; border-radius: 50%;
   border: 1px solid var(--border); overflow: hidden; cursor: pointer;
@@ -365,7 +365,7 @@ header {
 .modal-close-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
 .modal-logo-wrap { margin-bottom: 1.4rem; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .modal-wordmark {
-  max-width: 180px; height: auto; max-height: 28px;
+  max-width: 240px; height: auto; max-height: 40px;
   object-fit: contain;
   filter: brightness(0) invert(1);
 }
@@ -400,7 +400,7 @@ header {
 <!-- SIDEBAR -->
 <aside id="sidebar">
   <div class="sidebar-header">
-    <img src="https://raw.githubusercontent.com/sparkonedev-stack/assets/main/%E0%B9%84%E0%B8%A1%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%20255_20260601022229.png"
+    <img src="https://raw.githubusercontent.com/sparkonedev-stack/assets/main/file_00000000204c72078e7773fe279254d6.png"
          class="sidebar-logo" alt="SparkOne">
     <button class="sidebar-close" onclick="closeSidebar()"><i class="bi bi-x-lg"></i></button>
   </div>
@@ -440,7 +440,7 @@ header {
 <header>
   <div class="header-left">
     <button class="menu-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
-    <img src="https://raw.githubusercontent.com/sparkonedev-stack/assets/main/%E0%B9%84%E0%B8%A1%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%20255_20260601022229.png"
+    <img src="https://raw.githubusercontent.com/sparkonedev-stack/assets/main/file_00000000204c72078e7773fe279254d6.png"
          class="header-logo" alt="SparkOne">
   </div>
   <div id="header-auth">
@@ -537,7 +537,7 @@ header {
           <div class="contact-value">sparkone.dev@gmail.com</div>
         </div>
       </a>
-      <a href="https://www.facebook.com/profile.php?id=61576936590935" target="_blank" class="contact-card">
+      <a href="https://www.facebook.com/share/1bPkoroYPU/" target="_blank" class="contact-card">
         <div class="contact-icon"><i class="bi bi-facebook"></i></div>
         <div class="contact-info">
           <div class="contact-label">Facebook Page</div>
