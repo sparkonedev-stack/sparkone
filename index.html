@@ -338,6 +338,106 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
 .c-reply-input { flex: 1; background: #18181b; border: 1px solid var(--border); border-radius: 8px; padding: 5px 9px; color: var(--text); font-size: 0.8rem; font-family: inherit; outline: none; }
 .c-reply-input:focus { border-color: #52525b; }
 .c-reply-send { background: transparent; border: none; color: #a78bfa; cursor: pointer; font-size: 0.9rem; padding: 2px; }
+
+/* COMMENT POPUP (glassmorphism) */
+.comment-popup-bg {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  z-index: 150; display: none;
+  align-items: flex-end; justify-content: center;
+}
+.comment-popup-bg.open { display: flex; }
+.comment-popup-box {
+  background: rgba(15,15,18,0.92);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px 20px 0 0;
+  width: 100%; max-width: 680px;
+  height: 82vh; display: flex; flex-direction: column;
+  animation: slideUp 0.28s cubic-bezier(0.16,1,0.3,1);
+}
+.comment-popup-header {
+  padding: 1rem 1.2rem 0.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.comment-popup-title { font-size: 0.88rem; font-weight: 700; color: var(--accent); }
+.comment-popup-close {
+  background: rgba(255,255,255,0.07); border: none;
+  color: var(--muted); width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; cursor: pointer;
+}
+.comment-popup-close:hover { background: rgba(255,255,255,0.14); color: #fff; }
+.comment-popup-list {
+  flex: 1; overflow-y: auto; padding: 1rem 1.2rem;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.comment-popup-input {
+  padding: 0.8rem 1.2rem 1.2rem;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+}
+.comment-popup-input .ab-input {
+  border-radius: 20px; padding: 8px 14px; background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.1);
+}
+/* Preview comments (2 shown under post) */
+.comment-preview { margin-top: 8px; display: flex; flex-direction: column; gap: 7px; }
+.comment-preview-item { display: flex; gap: 7px; align-items: flex-start; }
+.comment-preview-av { width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: #18181b; border: 1px solid var(--border); flex-shrink: 0; }
+.comment-preview-av img { width: 100%; height: 100%; object-fit: cover; }
+.comment-preview-bubble { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 5px 10px; max-width: calc(100% - 30px); }
+.comment-preview-name { font-size: 0.72rem; font-weight: 700; color: var(--accent); }
+.comment-preview-text { font-size: 0.8rem; color: #d4d4d8; line-height: 1.4; }
+.see-all-comments-btn {
+  background: transparent; border: none; color: #a78bfa;
+  font-size: 0.78rem; cursor: pointer; padding: 4px 0;
+  font-family: inherit; text-align: left;
+  display: flex; align-items: center; gap: 4px;
+}
+.see-all-comments-btn:hover { color: #c4b5fd; }
+/* Reply toggle */
+.see-replies-btn {
+  background: transparent; border: none; color: #a78bfa;
+  font-size: 0.72rem; cursor: pointer; padding: 3px 0 3px 35px;
+  font-family: inherit; display: flex; align-items: center; gap: 4px;
+}
+.see-replies-btn:hover { color: #c4b5fd; }
+.replies-container { display: none; padding-left: 35px; margin-top: 4px; }
+.replies-container.open { display: block; }
+/* Admin reply highlight */
+.admin-reply-preview {
+  margin-left: 35px; margin-top: 6px;
+  background: rgba(167,139,250,0.06);
+  border-left: 2px solid #a78bfa;
+  border-radius: 0 8px 8px 0;
+  padding: 6px 10px;
+}
+.admin-reply-preview .c-author { font-size: 0.75rem; }
+.admin-reply-preview .c-text { font-size: 0.8rem; }
+
+/* SHARE UI — dark theme */
+.share-modal-bg { background: rgba(0,0,0,0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.share-box {
+  background: rgba(10,10,14,0.95) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 20px 20px 0 0 !important;
+}
+.share-title { color: #71717a !important; }
+.share-btn {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: var(--text) !important;
+  transition: border-color 0.15s, background 0.15s !important;
+}
+.share-btn:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.2) !important; }
+.share-btn span { color: #71717a !important; font-size: 0.68rem !important; }
+.share-copy { background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.08) !important; }
+.share-url { color: #52525b !important; }
+.share-copy-btn { background: rgba(167,139,250,0.15) !important; border-color: rgba(167,139,250,0.3) !important; color: #a78bfa !important; }
 /* scrollbar */
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -865,14 +965,14 @@ async function fetchPosts(){
                 onkeydown="if(event.key==='Enter'){event.preventDefault();quickSend('${pid}',this);}">
               <button class="ab-send" onclick="quickSend('${pid}',this.previousElementSibling)"><i class="bi bi-send-fill"></i></button>
             </div>
-            <button class="ab-comments" onclick="toggleComments('${pid}')">
+            <button class="ab-comments" onclick="openCommentPopup('${pid}')">
               <i class="bi bi-chat-square-dots"></i><span id="cc-${pid}">0</span>
             </button>
             <button class="ab-share" onclick="openShare('${(p.title||'').replace(/'/g,"\'").replace(/`/g,"'")}','${pid}')">
               <i class="bi bi-share"></i>
             </button>
           </div>
-          <div class="comment-section" id="cs-${pid}">
+          <div class="comment-section open" id="cs-${pid}" style="display:block;padding-top:8px;border-top:1px solid var(--border);margin-top:8px;">
             <div class="c-list" id="cl-${pid}">
               <div class="skel-card" style="padding:0.8rem;background:transparent;border:none;">
                 <div class="skeleton skel-line" style="width:40%;height:8px;"></div>
@@ -889,78 +989,67 @@ async function fetchPosts(){
   }catch(e){console.error(e);}
 }
 
-// ── LISTEN COMMENTS (real-time, no composite index needed) ──
+// ── LISTEN COMMENTS ──
+const postCommentData={}; // cache for popup
 function listenComments(pid){
-  // Query only by postId + createdAt — no parentId filter to avoid needing composite index
   const q=query(collection(db,'comments'),where('postId','==',pid),orderBy('createdAt','asc'));
   onSnapshot(q,snap=>{
-    // Split into top-level and replies in JS
     const topLevel=[],replies={};
     snap.forEach(d=>{
       const c=d.data();
       if(!c.parentId||c.parentId===''){topLevel.push({id:d.id,...c});}
       else{if(!replies[c.parentId])replies[c.parentId]=[];replies[c.parentId].push({id:d.id,...c});}
     });
+    // Cache for popup
+    postCommentData[pid]={topLevel,replies};
     const el=document.getElementById('cl-'+pid);if(!el)return;
     const cc=document.getElementById('cc-'+pid);if(cc)cc.textContent=topLevel.length;
-    if(topLevel.length===0){el.innerHTML='<p class="c-empty">ยังไม่มีความคิดเห็น — เป็นคนแรกได้เลย!</p>';return;}
-    el.innerHTML='';
-    topLevel.forEach(c=>{
-      const cid=c.id,isAdm=c.userEmail===ADMIN;
-      const t=c.createdAt?relTime(c.createdAt.toDate()):'';
-      const item=document.createElement('div');
-      item.className='c-item';item.id='ci-'+cid;
-      item.innerHTML=`
-        <div class="c-main-row">
-          <div class="c-av"><img src="${c.userPhoto||''}" onerror="this.style.display='none'" loading="lazy"></div>
-          <div class="c-body">
-            <div class="c-author">${esc(c.userName)}${isAdm?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${t}</span></div>
-            <div class="c-text">${esc(c.text)}</div>
-          </div>
-        </div>
-        <div class="c-actions">
-          <button class="c-action-btn" id="clb-${cid}" onclick="likeComment('${cid}','${pid}')">
-            <i class="bi bi-hand-thumbs-up"></i><span id="clk-${cid}">${Math.max(0,c.likes||0)}</span>
-          </button>
-          <button class="c-action-btn" id="cdb-${cid}" onclick="dislikeComment('${cid}','${pid}')">
-            <i class="bi bi-hand-thumbs-down"></i><span id="cdk-${cid}">${Math.max(0,c.dislikes||0)}</span>
-          </button>
-          <button class="c-action-btn c-reply-btn" onclick="toggleReplyInput('${cid}','${pid}')">
-            <i class="bi bi-reply"></i> ตอบกลับ
-          </button>
-        </div>
-        <div class="c-reply-input-wrap" id="ri-${cid}" style="display:none;">
-          <input class="c-reply-input" placeholder="ตอบกลับ ${esc(c.userName)}..." id="rit-${cid}"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();sendReply('${cid}','${pid}',this);}">
-          <button class="c-reply-send" onclick="sendReply('${cid}','${pid}',document.getElementById('rit-${cid}'))"><i class="bi bi-send-fill"></i></button>
-        </div>
-        <div class="c-replies" id="rp-${cid}"></div>`;
-      el.appendChild(item);
-      // Render replies inline from JS-filtered data
-      const rpEl=document.getElementById('rp-'+cid);
-      if(rpEl&&replies[cid]){
-        rpEl.innerHTML='';
-        replies[cid].forEach(r=>{
-          const isAdmR=r.userEmail===ADMIN;
-          const tR=r.createdAt?relTime(r.createdAt.toDate()):'';
-          const rItem=document.createElement('div');rItem.className='c-item';
-          rItem.innerHTML=`
-            <div class="c-main-row">
-              <div class="c-av" style="width:22px;height:22px;border-radius:50%;overflow:hidden;background:#18181b;border:1px solid var(--border);flex-shrink:0;">
-                <img src="${r.userPhoto||''}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" loading="lazy">
-              </div>
-              <div class="c-body">
-                <div class="c-author" style="font-size:0.75rem;">${esc(r.userName)}${isAdmR?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${tR}</span></div>
-                <div class="c-text" style="font-size:0.8rem;">${esc(r.text)}</div>
-              </div>
-            </div>`;
-          rpEl.appendChild(rItem);
-        });
-      }
-    });
-    // Restore comment like state
-    if(currentUser)restoreCommentLikeState(currentUser.uid,pid);
+    // Render preview (first 2 comments) under post
+    renderCommentPreview(pid,topLevel,replies);
+    // If popup is open for this post, refresh it
+    if(document.getElementById('comment-popup').classList.contains('open')&&window._popupPid===pid){
+      renderPopupComments(pid);
+    }
   },e=>console.error(e));
+}
+
+function renderCommentPreview(pid,topLevel,replies){
+  const el=document.getElementById('cl-'+pid);if(!el)return;
+  if(topLevel.length===0){
+    el.innerHTML='<p class="c-empty">ยังไม่มีความคิดเห็น</p>';return;
+  }
+  el.innerHTML='';
+  // Show first 2
+  const preview=topLevel.slice(0,2);
+  const wrap=document.createElement('div');wrap.className='comment-preview';
+  preview.forEach(c=>{
+    const isAdm=c.userEmail===ADMIN;
+    const div=document.createElement('div');div.className='comment-preview-item';
+    div.innerHTML=`
+      <div class="comment-preview-av"><img src="${c.userPhoto||''}" onerror="this.style.display='none'" loading="lazy"></div>
+      <div class="comment-preview-bubble">
+        <span class="comment-preview-name">${esc(c.userName)}${isAdm?'<span class="c-admin-tag" style="font-size:0.6rem;margin-left:3px;">ADMIN</span>':''}</span>
+        <div class="comment-preview-text">${esc(c.text)}</div>
+      </div>`;
+    wrap.appendChild(div);
+    // Show admin reply inline if exists
+    const adminReplies=(replies[c.id]||[]).filter(r=>r.userEmail===ADMIN);
+    if(adminReplies.length>0){
+      const ar=adminReplies[0];
+      const arDiv=document.createElement('div');arDiv.className='admin-reply-preview';
+      arDiv.innerHTML=`<div class="c-author"><span class="c-admin-tag">ADMIN</span> ${esc(ar.userName)}</div><div class="c-text">${esc(ar.text)}</div>`;
+      wrap.appendChild(arDiv);
+    }
+  });
+  el.appendChild(wrap);
+  // See all button
+  if(topLevel.length>0){
+    const btn=document.createElement('button');
+    btn.className='see-all-comments-btn';
+    btn.innerHTML=`<i class="bi bi-chat-dots"></i> ดูความคิดเห็นทั้งหมด ${topLevel.length} รายการ`;
+    btn.onclick=()=>openCommentPopup(pid);
+    el.appendChild(btn);
+  }
 }
 
 // ── RESTORE COMMENT LIKE STATE ──
@@ -978,10 +1067,126 @@ async function restoreCommentLikeState(uid,pid){
   }catch(e){}
 }
 
-// ── TOGGLE COMMENTS ──
+
+// ── COMMENT POPUP ──
+window._popupPid=null;
+window.openCommentPopup=function(pid){
+  window._popupPid=pid;
+  document.getElementById('comment-popup').classList.add('open');
+  // Set avatar
+  const cpav=document.getElementById('cp-avatar');
+  if(currentUser&&cpav)cpav.innerHTML=`<img src="${currentUser.photoURL||''}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`;
+  renderPopupComments(pid);
+};
+window.closeCommentPopup=function(){
+  document.getElementById('comment-popup').classList.remove('open');
+  window._popupPid=null;
+};
+window.closeCommentPopupIfBg=function(e){
+  if(e.target.id==='comment-popup')closeCommentPopup();
+};
+window.sendFromPopup=async function(){
+  const pid=window._popupPid;if(!pid)return;
+  if(!currentUser){openLoginModal();return;}
+  const input=document.getElementById('cp-input');
+  const text=input.value.trim();if(!text)return;
+  input.value='';
+  try{
+    await addDoc(collection(db,'comments'),{
+      postId:pid,parentId:'',text,
+      userId:currentUser.uid,userName:currentUser.displayName,
+      userEmail:currentUser.email,userPhoto:currentUser.photoURL||'',
+      createdAt:serverTimestamp(),likes:0,dislikes:0
+    });
+  }catch(e){console.error(e);}
+};
+
+function renderPopupComments(pid){
+  const data=postCommentData[pid];if(!data)return;
+  const {topLevel,replies}=data;
+  const list=document.getElementById('cp-list');if(!list)return;
+  list.innerHTML='';
+  const title=document.getElementById('cp-title');
+  if(title)title.textContent=`ความคิดเห็น (${topLevel.length})`;
+
+  topLevel.forEach(c=>{
+    const cid=c.id,isAdm=c.userEmail===ADMIN;
+    const t=c.createdAt?relTime(c.createdAt.toDate()):'';
+    const reps=replies[cid]||[];
+    const adminReps=reps.filter(r=>r.userEmail===ADMIN);
+    const userReps=reps.filter(r=>r.userEmail!==ADMIN);
+
+    const item=document.createElement('div');item.className='c-item';
+    item.innerHTML=`
+      <div class="c-main-row">
+        <div class="c-av"><img src="${c.userPhoto||''}" onerror="this.style.display='none'" loading="lazy"></div>
+        <div class="c-body">
+          <div class="c-author">${esc(c.userName)}${isAdm?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${t}</span></div>
+          <div class="c-text">${esc(c.text)}</div>
+        </div>
+      </div>
+      <div class="c-actions">
+        <button class="c-action-btn" id="clb-${cid}" onclick="likeComment('${cid}','${pid}')">
+          <i class="bi bi-hand-thumbs-up"></i><span id="clk-${cid}">${Math.max(0,c.likes||0)}</span>
+        </button>
+        <button class="c-action-btn" id="cdb-${cid}" onclick="dislikeComment('${cid}','${pid}')">
+          <i class="bi bi-hand-thumbs-down"></i><span id="cdk-${cid}">${Math.max(0,c.dislikes||0)}</span>
+        </button>
+        <button class="c-action-btn c-reply-btn" onclick="togglePopupReply('${cid}','${pid}')">
+          <i class="bi bi-reply"></i> ตอบกลับ
+        </button>
+      </div>
+      <div class="c-reply-input-wrap" id="pri-${cid}" style="display:none;">
+        <input class="c-reply-input" placeholder="ตอบกลับ ${esc(c.userName)}..." id="prit-${cid}"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();sendReply('${cid}','${pid}',this);}">
+        <button class="c-reply-send" onclick="sendReply('${cid}','${pid}',document.getElementById('prit-${cid}'))"><i class="bi bi-send-fill"></i></button>
+      </div>
+      ${adminReps.length>0?`
+        <div class="admin-reply-preview">
+          <div class="c-author"><span class="c-admin-tag">ADMIN</span> ${esc(adminReps[0].userName)}<span class="c-time">${adminReps[0].createdAt?relTime(adminReps[0].createdAt.toDate()):''}</span></div>
+          <div class="c-text">${esc(adminReps[0].text)}</div>
+        </div>`:''}
+      ${userReps.length>0?`
+        <button class="see-replies-btn" onclick="toggleRepliesInPopup(this,'${cid}')">
+          <i class="bi bi-arrow-return-right"></i> ดูการตอบกลับ ${userReps.length} รายการ
+        </button>
+        <div class="replies-container" id="poprp-${cid}">
+          ${userReps.map(r=>`
+            <div class="c-item" style="margin-bottom:8px;">
+              <div class="c-main-row">
+                <div class="c-av" style="width:22px;height:22px;border-radius:50%;overflow:hidden;background:#18181b;border:1px solid var(--border);flex-shrink:0;">
+                  <img src="${r.userPhoto||''}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" loading="lazy">
+                </div>
+                <div class="c-body">
+                  <div class="c-author" style="font-size:0.75rem;">${esc(r.userName)}${r.userEmail===ADMIN?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${r.createdAt?relTime(r.createdAt.toDate()):''}</span></div>
+                  <div class="c-text" style="font-size:0.8rem;">${esc(r.text)}</div>
+                </div>
+              </div>
+            </div>`).join('')}
+        </div>`:''}`;
+    list.appendChild(item);
+  });
+  if(currentUser)restoreCommentLikeState(currentUser.uid,pid);
+}
+
+window.togglePopupReply=function(cid,pid){
+  if(!currentUser){openLoginModal();return;}
+  const wrap=document.getElementById('pri-'+cid);if(!wrap)return;
+  const isOpen=wrap.style.display!=='none';
+  wrap.style.display=isOpen?'none':'flex';
+  if(!isOpen)setTimeout(()=>document.getElementById('prit-'+cid)?.focus(),50);
+};
+window.toggleRepliesInPopup=function(btn,cid){
+  const container=document.getElementById('poprp-'+cid);if(!container)return;
+  container.classList.toggle('open');
+  btn.innerHTML=container.classList.contains('open')
+    ?'<i class="bi bi-arrow-return-right"></i> ซ่อนการตอบกลับ'
+    :`<i class="bi bi-arrow-return-right"></i> ดูการตอบกลับ`;
+};
+
+// ── TOGGLE COMMENTS — opens popup ──
 window.toggleComments=function(pid){
-  const cs=document.getElementById('cs-'+pid);
-  cs.classList.toggle('open');
+  openCommentPopup(pid);
 };
 
 // ── TOGGLE REPLY INPUT ──
@@ -1253,6 +1458,26 @@ fetchPosts();
     <p id="mascot-subtitle"></p>
   </div>
   <button class="mascot-close-btn" onclick="closeMascot()">ขอบคุณมาก! 🙏</button>
+</div>
+
+
+<!-- COMMENT POPUP -->
+<div class="comment-popup-bg" id="comment-popup" onclick="closeCommentPopupIfBg(event)">
+  <div class="comment-popup-box">
+    <div class="comment-popup-header">
+      <span class="comment-popup-title" id="cp-title">ความคิดเห็น</span>
+      <button class="comment-popup-close" onclick="closeCommentPopup()"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="comment-popup-list" id="cp-list"></div>
+    <div class="comment-popup-input" id="cp-input-wrap">
+      <div class="c-av" id="cp-avatar" style="width:30px;height:30px;border-radius:50%;overflow:hidden;background:#18181b;border:1px solid var(--border);flex-shrink:0;">
+        <i class="bi bi-person" style="font-size:0.8rem;color:var(--muted);"></i>
+      </div>
+      <input class="ab-input" id="cp-input" placeholder="แสดงความคิดเห็น..."
+        onkeydown="if(event.key==='Enter'){event.preventDefault();sendFromPopup();}">
+      <button class="ab-send" onclick="sendFromPopup()"><i class="bi bi-send-fill"></i></button>
+    </div>
+  </div>
 </div>
 
 </body>
