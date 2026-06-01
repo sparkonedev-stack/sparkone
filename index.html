@@ -14,9 +14,10 @@
         nav ul { display: flex; list-style: none; gap: 2rem; } 
         nav a { color: var(--text-muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s; cursor: pointer; } 
         nav a:hover, nav a.active { color: var(--accent-color); } 
-        main { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; } 
-        .view-section { display: none; } 
-        .view-section.active { display: block; } 
+        /* Page transition animation */
+        .view-section { display: none; opacity: 0; transform: translateY(10px); }
+        .view-section.active { display: block; animation: pageIn 0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
+        @keyframes pageIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
         .hero { text-align: center; padding: 4rem 0 6rem 0; border-bottom: 1px solid var(--border-color); } 
         .hero h1 { font-size: 3.5rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 1.5rem; line-height: 1.2; color: var(--accent-color); } 
         .hero p { font-size: 1.25rem; color: var(--text-muted); max-width: 700px; margin: 0 auto 2rem auto; } 
@@ -118,6 +119,13 @@
         .c-time { font-size: 0.73rem; color: var(--text-muted); font-weight: 400; }
         .c-text { font-size: 0.88rem; color: #d4d4d8; margin-top: 2px; line-height: 1.5; word-break: break-word; }
         .c-empty { color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+
+        /* ── Page transition ── */
+        @keyframes pageIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .view-section.page-enter { animation: pageIn 0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
     </style>
 </head>
 <body>
@@ -127,10 +135,10 @@
     <div class="modal-box">
         <button class="modal-close" onclick="closeModal()"><i class="bi bi-x-lg"></i></button>
         <div class="modal-logo">
-            <!-- โลโก้บริษัทพร้อมตัวอักษร (รูปที่ 1) -->
-            <img src="https://raw.githubusercontent.com/sparkonedev-stack/assets/main/%E0%B9%84%E0%B8%A1%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%20255_20260601022229.png"
-                 class="modal-logo-svg-icon" alt="SparkOne"
-                 style="width:140px;height:auto;object-fit:contain;filter:brightness(10);">
+            <img src="https://raw.githubusercontent.com/sparkonedev-stack/assets/main/%E0%B9%84%E0%B8%A1%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%20254_20260601021806.png"
+                 style="width:52px;height:52px;object-fit:contain;filter:brightness(10);" alt="">
+            <img src="https://raw.githubusercontent.com/sparkonedev-stack/assets/main/file_00000000204c72078e7773fe279254d6.png"
+                 style="height:18px;object-fit:contain;filter:brightness(10);opacity:0.9;" alt="SparkOne">
         </div>
         <h2>เข้าสู่ระบบ</h2>
         <p class="modal-sub">เข้าสู่ระบบเพื่อแสดงความคิดเห็นในโพสต์</p>
@@ -145,10 +153,8 @@
 <header>
     <div class="nav-container">
         <div class="logo-section">
-            <img src="https://raw.githubusercontent.com/sparkonedev-stack/assets/main/%E0%B9%84%E0%B8%A1%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%20254_20260601021806.png"
-                 style="height:28px;object-fit:contain;filter:brightness(10);" alt="SparkOne">
-            <img src="https://raw.githubusercontent.com/sparkonedev-stack/assets/main/file_00000000204c72078e7773fe279254d6.png"
-                 style="height:18px;object-fit:contain;filter:brightness(10);opacity:0.9;" alt="SPARKONE">
+            <img src="https://raw.githubusercontent.com/sparkonedev-stack/assets/main/%E0%B9%84%E0%B8%A1%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%20255_20260601022229.png"
+                 style="height:48px;object-fit:contain;filter:brightness(10);" alt="SparkOne">
         </div>
         <nav>
             <ul>
@@ -241,8 +247,14 @@
 <!-- ── global stubs ก่อน module โหลด เพื่อให้ onclick ใน HTML หาเจอ ── -->
 <script>
     window.switchView = function(v) {
-        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-        document.getElementById('view-' + v).classList.add('active');
+        document.querySelectorAll('.view-section').forEach(s => {
+            s.classList.remove('active');
+            s.classList.remove('page-enter');
+        });
+        const target = document.getElementById('view-' + v);
+        target.classList.add('active');
+        void target.offsetWidth; // force reflow
+        target.classList.add('page-enter');
         document.querySelectorAll('nav a').forEach(l => l.classList.remove('active'));
         const sel = document.getElementById('nav-' + v);
         if (sel) sel.classList.add('active');
@@ -256,7 +268,7 @@
 <script type="module">
     // ── imports เหมือนเดิม + เพิ่ม auth และ comment ──
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, collection, getDocs, addDoc, query, orderBy, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     // ── config เดิมทุกอย่าง ──
@@ -280,7 +292,12 @@
     window.openModal = () => document.getElementById('login-modal').classList.add('open');
     window.closeModal = () => document.getElementById('login-modal').classList.remove('open');
     document.getElementById('login-modal').addEventListener('click', e => { if (e.target.id === 'login-modal') closeModal(); });
-    document.getElementById('google-login-btn').onclick = () => signInWithPopup(auth, provider).catch(console.error);
+    document.getElementById('google-login-btn').onclick = async () => {
+        try {
+            await setPersistence(auth, browserLocalPersistence);
+            await signInWithPopup(auth, provider);
+        } catch(e) { console.error(e); }
+    };
 
     // ── Auth state ──
     onAuthStateChanged(auth, user => {
@@ -312,8 +329,14 @@
 
     // ── switchView เดิม ──
     window.switchView = function(v) {
-        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-        document.getElementById('view-' + v).classList.add('active');
+        document.querySelectorAll('.view-section').forEach(s => {
+            s.classList.remove('active');
+            s.classList.remove('page-enter');
+        });
+        const target = document.getElementById('view-' + v);
+        target.classList.add('active');
+        void target.offsetWidth; // force reflow
+        target.classList.add('page-enter');
         document.querySelectorAll('nav a').forEach(l => l.classList.remove('active'));
         const sel = document.getElementById('nav-' + v);
         if (sel) sel.classList.add('active');
