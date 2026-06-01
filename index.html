@@ -718,12 +718,10 @@ onAuthStateChanged(auth, user => {
     sbFooter.style.display = 'none';
   }
 
-  // Refresh comment areas
-  document.querySelectorAll('.comment-input-row').forEach(el => el.style.display = user ? 'flex' : 'none');
-  document.querySelectorAll('.comment-login-prompt').forEach(el => el.style.display = user ? 'none' : 'flex');
-  if (user) {
-    document.querySelectorAll('.c-av-input').forEach(el => { el.innerHTML = `<img src="${user.photoURL}" alt="">`; });
-  }
+  // Refresh inline comment inputs
+  document.querySelectorAll('.c-quick-input').forEach(el => {
+    el.placeholder = user ? 'แสดงความคิดเห็น...' : 'Sign in เพื่อแสดงความคิดเห็น...';
+  });
 });
 
 // Expand comments (called when clicking input in overlay)
@@ -740,6 +738,29 @@ window.expandComments = function(pid, inputEl) {
     if (ta) { ta.focus(); }
     inputEl.blur();
   }, 50);
+};
+
+// Quick send from inline input
+window.quickSend = async function(pid, input) {
+  if (!currentUser) { openLoginModal(); return; }
+  const text = input.value.trim();
+  if (!text) return;
+  const origPlaceholder = input.placeholder;
+  input.value = '';
+  input.placeholder = 'กำลังส่ง...';
+  input.disabled = true;
+  try {
+    await addDoc(collection(db,"comments"), {
+      postId: pid, text,
+      userId: currentUser.uid, userName: currentUser.displayName,
+      userEmail: currentUser.email, userPhoto: currentUser.photoURL||'',
+      createdAt: serverTimestamp()
+    });
+    // Auto-expand comments after sending
+    const cs = document.getElementById('cs-' + pid);
+    if (!cs.classList.contains('expanded')) toggleComments(pid);
+  } catch(e) { console.error(e); }
+  finally { input.disabled = false; input.placeholder = origPlaceholder; }
 };
 
 // Toggle comments
@@ -833,36 +854,30 @@ async function fetchPosts() {
         <h3>${p.title||''}</h3>
         <div class="post-content">${p.content||''}</div>
         ${p.image && p.image!=='null' ? `<img src="${p.image}" class="post-img">` : ''}
-        <div class="post-actions">
-          <button class="action-btn" id="like-btn-${pid}" onclick="handleLike('${pid}')">
+        <div class="action-bar">
+          <button class="action-like" id="like-btn-${pid}" onclick="handleLike('${pid}')">
             <i class="bi bi-hand-thumbs-up"></i>
             <span class="action-count" id="like-count-${pid}">${p.likes||0}</span>
           </button>
-          <button class="action-btn" id="dislike-btn-${pid}" onclick="handleDislike('${pid}')">
+          <button class="action-dislike" id="dislike-btn-${pid}" onclick="handleDislike('${pid}')">
             <i class="bi bi-hand-thumbs-down"></i>
             <span class="action-count" id="dislike-count-${pid}">${p.dislikes||0}</span>
           </button>
-          <button class="comment-toggle-btn" onclick="toggleComments('${pid}')">
-            <i class="bi bi-chat-dots"></i>
-            <span id="comment-count-${pid}">0</span> ความคิดเห็น
-            <i class="bi bi-chevron-down" id="chevron-${pid}" style="font-size:0.75rem;margin-left:2px;transition:transform 0.2s;"></i>
+          <div class="action-comment-wrap" id="acw-${pid}">
+            <input class="action-comment-input c-quick-input" placeholder="แสดงความคิดเห็น..."
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();quickSend('${pid}',this);}">
+            <button class="action-send-btn" onclick="quickSend('${pid}',this.previousElementSibling)">
+              <i class="bi bi-send-fill"></i>
+            </button>
+          </div>
+          <button class="action-comment-count" onclick="toggleComments('${pid}')">
+            <i class="bi bi-chat-square-dots"></i>
+            <span id="comment-count-${pid}">0</span>
           </button>
         </div>
         <div class="comment-section" id="cs-${pid}">
-          <div style="margin-top:1rem;">
-            <div class="comment-login-prompt" style="display:flex;">
-              <p><i class="bi bi-person-lock"></i> เข้าสู่ระบบเพื่อแสดงความคิดเห็น</p>
-              <button class="btn-login-inline" onclick="openLoginModal()"><i class="bi bi-google"></i> Sign in</button>
-            </div>
-            <div class="comment-input-row" style="display:none;">
-              <div class="c-av c-av-input"><i class="bi bi-person"></i></div>
-              <div class="c-wrap">
-                <textarea class="c-in" placeholder="เขียนความคิดเห็น..." rows="1"
-                  oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
-                <button class="btn-send" onclick="sendComment(this,'${pid}')"><i class="bi bi-send-fill"></i></button>
-              </div>
-            </div>
-            <div class="c-list" id="cl-${pid}"><p class="c-empty">กำลังโหลด...</p></div>
+          <div class="c-list-wrap">
+            <div class="c-list" id="cl-${pid}" style="padding:8px 0;"><p class="c-empty">กำลังโหลด...</p></div>
           </div>
         </div>`;
       target.appendChild(card);
@@ -870,9 +885,9 @@ async function fetchPosts() {
     });
 
     if (currentUser) {
-      document.querySelectorAll('.comment-input-row').forEach(el => el.style.display = 'flex');
-      document.querySelectorAll('.comment-login-prompt').forEach(el => el.style.display = 'none');
-      document.querySelectorAll('.c-av-input').forEach(el => { el.innerHTML = `<img src="${currentUser.photoURL}" alt="">`; });
+      document.querySelectorAll('.c-quick-input').forEach(el => {
+        el.placeholder = 'แสดงความคิดเห็น...';
+      });
     }
   } catch(e) {
     console.error(e);
