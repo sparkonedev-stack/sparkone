@@ -398,7 +398,7 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
   </div>
 </header>
 
-<!-- SHARE MODAL -->
+<!-- SHARE MODAL (fallback for desktop) -->
 <div class="share-modal-bg" id="share-modal" onclick="closeShareIfBg(event)">
   <div class="share-box">
     <div class="share-title">
@@ -412,7 +412,7 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
       <a class="share-btn" id="sh-tw" href="#" target="_blank"><i class="bi bi-twitter-x"></i><span>X</span></a>
       <a class="share-btn" id="sh-ig" href="#" target="_blank"><i class="bi bi-instagram" style="color:#e1306c"></i><span>Instagram</span></a>
       <a class="share-btn" id="sh-wa" href="#" target="_blank"><i class="bi bi-whatsapp" style="color:#25d366"></i><span>WhatsApp</span></a>
-      <a class="share-btn" id="sh-ai" href="#" target="_blank"><i class="bi bi-stars" style="color:#a78bfa"></i><span>ถามกับ AI</span></a>
+      <a class="share-btn" id="sh-ai" href="#" onclick="event.preventDefault();openAiSharePicker(currentShareText,currentShareUrl)"><i class="bi bi-stars" style="color:#a78bfa"></i><span>ถามกับ AI</span></a>
       <button class="share-btn" onclick="copyShareLink()"><i class="bi bi-link-45deg"></i><span>คัดลอก</span></button>
     </div>
     <div class="share-copy">
@@ -593,10 +593,11 @@ window.closeLoginModal=function(){document.getElementById('login-modal').classLi
 window.closeLoginIfBg=function(e){if(e.target.id==='login-modal')closeLoginModal();};
 
 // SHARE MODAL
-let currentShareUrl='';
+let currentShareUrl='',currentShareText='';
 window.openShare=async function(postTitle,postId){
   const url=window.location.origin+window.location.pathname+'?post='+postId;
   const text='อ่านโพสต์: '+postTitle+' บน SparkOne';
+  currentShareText=text;
   // Web Share API — native OS share sheet (รองรับมือถือทุกรุ่น)
   if(navigator.share){
     try{await navigator.share({title:'SparkOne — '+postTitle,text:text,url:url});return;}
@@ -888,16 +889,24 @@ async function fetchPosts(){
   }catch(e){console.error(e);}
 }
 
-// ── LISTEN COMMENTS (real-time, persistent) ──
+// ── LISTEN COMMENTS (real-time, no composite index needed) ──
 function listenComments(pid){
-  const q=query(collection(db,'comments'),where('postId','==',pid),where('parentId','==',''),orderBy('createdAt','asc'));
+  // Query only by postId + createdAt — no parentId filter to avoid needing composite index
+  const q=query(collection(db,'comments'),where('postId','==',pid),orderBy('createdAt','asc'));
   onSnapshot(q,snap=>{
-    const el=document.getElementById('cl-'+pid);if(!el)return;
-    const cc=document.getElementById('cc-'+pid);if(cc)cc.textContent=snap.size;
-    if(snap.empty){el.innerHTML='<p class="c-empty">ยังไม่มีความคิดเห็น — เป็นคนแรกได้เลย!</p>';return;}
-    el.innerHTML='';
+    // Split into top-level and replies in JS
+    const topLevel=[],replies={};
     snap.forEach(d=>{
-      const c=d.data(),cid=d.id,isAdm=c.userEmail===ADMIN;
+      const c=d.data();
+      if(!c.parentId||c.parentId===''){topLevel.push({id:d.id,...c});}
+      else{if(!replies[c.parentId])replies[c.parentId]=[];replies[c.parentId].push({id:d.id,...c});}
+    });
+    const el=document.getElementById('cl-'+pid);if(!el)return;
+    const cc=document.getElementById('cc-'+pid);if(cc)cc.textContent=topLevel.length;
+    if(topLevel.length===0){el.innerHTML='<p class="c-empty">ยังไม่มีความคิดเห็น — เป็นคนแรกได้เลย!</p>';return;}
+    el.innerHTML='';
+    topLevel.forEach(c=>{
+      const cid=c.id,isAdm=c.userEmail===ADMIN;
       const t=c.createdAt?relTime(c.createdAt.toDate()):'';
       const item=document.createElement('div');
       item.className='c-item';item.id='ci-'+cid;
@@ -927,36 +936,30 @@ function listenComments(pid){
         </div>
         <div class="c-replies" id="rp-${cid}"></div>`;
       el.appendChild(item);
-      listenReplies(cid,pid);
+      // Render replies inline from JS-filtered data
+      const rpEl=document.getElementById('rp-'+cid);
+      if(rpEl&&replies[cid]){
+        rpEl.innerHTML='';
+        replies[cid].forEach(r=>{
+          const isAdmR=r.userEmail===ADMIN;
+          const tR=r.createdAt?relTime(r.createdAt.toDate()):'';
+          const rItem=document.createElement('div');rItem.className='c-item';
+          rItem.innerHTML=`
+            <div class="c-main-row">
+              <div class="c-av" style="width:22px;height:22px;border-radius:50%;overflow:hidden;background:#18181b;border:1px solid var(--border);flex-shrink:0;">
+                <img src="${r.userPhoto||''}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" loading="lazy">
+              </div>
+              <div class="c-body">
+                <div class="c-author" style="font-size:0.75rem;">${esc(r.userName)}${isAdmR?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${tR}</span></div>
+                <div class="c-text" style="font-size:0.8rem;">${esc(r.text)}</div>
+              </div>
+            </div>`;
+          rpEl.appendChild(rItem);
+        });
+      }
     });
     // Restore comment like state
     if(currentUser)restoreCommentLikeState(currentUser.uid,pid);
-  },e=>console.error(e));
-}
-
-// ── LISTEN REPLIES ──
-function listenReplies(cid,pid){
-  const q=query(collection(db,'comments'),where('postId','==',pid),where('parentId','==',cid),orderBy('createdAt','asc'));
-  onSnapshot(q,snap=>{
-    const el=document.getElementById('rp-'+cid);if(!el)return;
-    el.innerHTML='';
-    snap.forEach(d=>{
-      const c=d.data(),rid=d.id,isAdm=c.userEmail===ADMIN;
-      const t=c.createdAt?relTime(c.createdAt.toDate()):'';
-      const item=document.createElement('div');
-      item.className='c-item';
-      item.innerHTML=`
-        <div class="c-main-row">
-          <div class="c-av" style="width:22px;height:22px;border-radius:50%;overflow:hidden;background:#18181b;border:1px solid var(--border);flex-shrink:0;">
-            <img src="${c.userPhoto||''}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" loading="lazy">
-          </div>
-          <div class="c-body">
-            <div class="c-author" style="font-size:0.75rem;">${esc(c.userName)}${isAdm?'<span class="c-admin-tag">ADMIN</span>':''}<span class="c-time">${t}</span></div>
-            <div class="c-text" style="font-size:0.8rem;">${esc(c.text)}</div>
-          </div>
-        </div>`;
-      el.appendChild(item);
-    });
   },e=>console.error(e));
 }
 
