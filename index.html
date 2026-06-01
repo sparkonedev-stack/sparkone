@@ -269,6 +269,59 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
 .hof-av{width:36px;height:36px;border-radius:50%;background:#18181b;margin:0 auto 5px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:var(--muted);}
 .hof-name{font-size:0.72rem;font-weight:600;color:var(--accent);}
 .hof-amt{font-size:0.68rem;color:#a78bfa;}
+
+/* SUPPORT PAGE */
+.support-hero{text-align:center;padding:2rem 1rem;margin-bottom:1.5rem;}
+.support-hero h2{font-size:1.4rem;font-weight:800;color:var(--accent);margin-bottom:0.4rem;}
+.support-hero p{font-size:0.85rem;color:var(--muted);}
+.support-notice{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:0.9rem 1.1rem;margin-bottom:1.4rem;font-size:0.8rem;color:#fbbf24;display:flex;gap:8px;align-items:flex-start;line-height:1.6;}
+.support-notice i{flex-shrink:0;margin-top:1px;}
+.support-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:14px;margin-bottom:1.5rem;}
+.support-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;}
+.support-card h3{font-size:0.95rem;font-weight:700;color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;gap:7px;}
+.qr-placeholder{width:140px;height:140px;background:#18181b;border:2px dashed var(--border);border-radius:10px;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;color:var(--muted);font-size:0.72rem;}
+.qr-placeholder i{font-size:1.8rem;}
+.bank-info{background:#18181b;border-radius:8px;padding:0.7rem 0.9rem;}
+.bank-info .bank-name{font-size:0.78rem;font-weight:600;color:var(--accent);margin-bottom:2px;}
+.bank-info .bank-acc{font-size:1rem;font-weight:700;color:#a78bfa;letter-spacing:1px;}
+.bank-info .bank-owner{font-size:0.72rem;color:var(--muted);margin-top:1px;}
+/* TRANSPARENCY */
+.transparency-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:10px;margin-bottom:1.5rem;}
+.trans-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;}
+.trans-num{font-size:1.3rem;font-weight:800;color:var(--accent);}
+.trans-label{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+.trans-income{color:#4ade80;}
+.trans-expense{color:#f87171;}
+.trans-table{width:100%;border-collapse:collapse;font-size:0.8rem;}
+.trans-table th{text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);color:var(--muted);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;}
+.trans-table td{padding:9px 10px;border-bottom:1px solid #18181b;color:var(--text);}
+.hof-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;}
+.hof-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.7rem;text-align:center;}
+.hof-av{width:32px;height:32px;border-radius:50%;background:#18181b;margin:0 auto 4px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:0.78rem;color:var(--muted);}
+.hof-name{font-size:0.7rem;font-weight:600;color:var(--accent);}
+.hof-amt{font-size:0.65rem;color:#a78bfa;}
+
+/* MASCOT ANIMATION OVERLAY */
+.mascot-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;}
+.mascot-overlay.show{display:flex;animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.mascot-scene{position:relative;width:320px;height:200px;overflow:hidden;}
+.mascot-char{position:absolute;bottom:0;font-size:3.5rem;animation:walk 0.4s steps(2) infinite;}
+@keyframes walk{0%{transform:scaleX(1);}50%{transform:scaleX(-1);}100%{transform:scaleX(1);}}
+.mascot-char.run{animation:run 0.25s steps(2) infinite,moveRight 2.5s linear forwards;}
+.mascot-char.walk-slow{animation:walk 0.5s steps(2) infinite,moveRight 3s linear forwards;}
+.mascot-char.drag{animation:walk 0.7s steps(2) infinite,moveRight 4s linear forwards;}
+@keyframes moveRight{from{left:-60px;}to{left:340px;}}
+.mascot-bag{position:absolute;bottom:8px;font-size:2rem;}
+.mascot-msg{margin-top:1.5rem;text-align:center;}
+.mascot-msg h3{font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:6px;}
+.mascot-msg p{font-size:0.85rem;color:rgba(255,255,255,0.6);}
+.mascot-amount{font-size:2rem;font-weight:800;color:#a78bfa;margin-bottom:0.5rem;}
+.mascot-close-btn{margin-top:1.5rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:10px 24px;border-radius:10px;font-size:0.9rem;cursor:pointer;font-family:inherit;}
+.mascot-close-btn:hover{background:rgba(255,255,255,0.18);}
+.confetti{position:absolute;width:8px;height:8px;border-radius:50%;animation:fall linear forwards;}
+@keyframes fall{from{transform:translateY(-20px) rotate(0deg);opacity:1;}to{transform:translateY(220px) rotate(720deg);opacity:0;}}
+
 /* scrollbar */
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -446,6 +499,79 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
       <a href="https://www.facebook.com/share/1bPkoroYPU/" target="_blank" class="contact-card"><div class="contact-icon"><i class="bi bi-facebook" style="color:#1877f2"></i></div><div><div class="contact-label">Facebook Page</div><div class="contact-value">SparkOne Official</div></div></a>
     </div>
   </div>
+
+  <!-- SUPPORT -->
+  <div id="view-support" class="view">
+    <div class="support-hero">
+      <h2><i class="bi bi-heart-fill" style="color:#a78bfa"></i> สนับสนุน SparkOne</h2>
+      <p>ช่วยให้เราสร้าง NOVA และโปรเจกต์ AI ต่อไปได้ ทุกบาทมีความหมาย ✨</p>
+    </div>
+    <div class="support-notice">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <span><strong>ข้อความสำคัญ:</strong> นี่คือ<strong>การบริจาค</strong>เท่านั้น ไม่ใช่การลงทุน ไม่มีผลตอบแทนทางการเงิน ตามมาตรา 521 ประมวลกฎหมายแพ่งและพาณิชย์</span>
+    </div>
+    <div class="support-grid">
+      <div class="support-card">
+        <h3><i class="bi bi-bank"></i> โอนเงินธนาคาร</h3>
+        <div class="qr-placeholder"><i class="bi bi-qr-code"></i><span>QR PromptPay</span><span style="font-size:0.65rem;color:#3f3f46;">อัปเดตเร็วๆนี้</span></div>
+        <div class="bank-info">
+          <div class="bank-name"><i class="bi bi-bank2"></i> ธนาคารกรุงไทย (KTB)</div>
+          <div class="bank-acc">313-0-97144-0</div>
+          <div class="bank-owner">นาย กิตติพงษ์ จันทร์เพ็ง</div>
+        </div>
+        <div style="margin-top:12px;">
+          <label style="font-size:0.78rem;color:var(--muted);display:block;margin-bottom:6px;">ระบุจำนวนเงินเพื่อดูอนิเมชั่น:</label>
+          <div style="display:flex;gap:8px;">
+            <input id="donate-amount" type="number" placeholder="จำนวนเงิน (บาท)" min="1"
+              style="flex:1;background:#18181b;border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:0.85rem;outline:none;font-family:inherit;">
+            <button onclick="triggerDonationAnim()" style="background:#a78bfa;border:none;color:#fff;border-radius:8px;padding:7px 14px;font-size:0.85rem;font-weight:600;cursor:pointer;">ยืนยัน</button>
+          </div>
+          <p style="font-size:0.72rem;color:var(--muted);margin-top:6px;">* กดหลังจากโอนเงินแล้ว แล้วแจ้งสลิปทาง email ด้วยนะครับ</p>
+        </div>
+      </div>
+      <div class="support-card">
+        <h3><i class="bi bi-info-circle"></i> เงินจะถูกใช้ทำอะไร</h3>
+        <div style="text-align:left;font-size:0.83rem;color:var(--muted);line-height:1.9;">
+          <div><i class="bi bi-server" style="color:#a78bfa"></i> ค่า Server และ Cloud AI</div>
+          <div><i class="bi bi-tools" style="color:#a78bfa"></i> ค่าพัฒนา API และเครื่องมือ</div>
+          <div><i class="bi bi-mortarboard" style="color:#a78bfa"></i> ค่าเรียนและวิจัย AI</div>
+          <div><i class="bi bi-globe" style="color:#a78bfa"></i> ค่า Domain และ Hosting</div>
+        </div>
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.75rem;color:var(--muted);">
+          ดูรายละเอียดทั้งหมดใน<br>
+          <span style="color:#a78bfa;cursor:pointer;" onclick="switchView('transparency')">รายงานการเงิน →</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;font-size:0.78rem;color:var(--muted);line-height:1.7;">
+      <i class="bi bi-shield-check" style="color:#4ade80"></i> หลังโอนแล้ว แจ้งสลิปทาง
+      <a href="mailto:sparkone.dev@gmail.com" style="color:#a78bfa;">sparkone.dev@gmail.com</a> หรือ
+      <a href="https://www.facebook.com/share/1bPkoroYPU/" target="_blank" style="color:#a78bfa;">Facebook Page</a>
+      เพื่อบันทึกยอดและเพิ่มชื่อใน Hall of Fame
+    </div>
+  </div>
+
+  <!-- TRANSPARENCY -->
+  <div id="view-transparency" class="view">
+    <h2 class="page-title"><i class="bi bi-bar-chart-line"></i> รายงานการเงิน</h2>
+    <p class="page-sub" style="margin-bottom:1.5rem;">ข้อมูลการรับและใช้จ่ายทั้งหมด อัปเดตโดยแอดมิน เพื่อความโปร่งใส</p>
+    <div class="transparency-summary">
+      <div class="trans-card"><div class="trans-num trans-income" id="total-income">฿0</div><div class="trans-label">ยอดรับรวม</div></div>
+      <div class="trans-card"><div class="trans-num trans-expense" id="total-expense">฿0</div><div class="trans-label">ใช้จ่ายรวม</div></div>
+      <div class="trans-card"><div class="trans-num" id="total-balance">฿0</div><div class="trans-label">คงเหลือ</div></div>
+      <div class="trans-card"><div class="trans-num" id="total-supporters">0</div><div class="trans-label">ผู้สนับสนุน</div></div>
+    </div>
+    <h3 style="font-size:0.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem;">รายการธุรกรรม</h3>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:2rem;">
+      <table class="trans-table">
+        <thead><tr><th>วันที่</th><th>รายการ</th><th>จำนวน</th><th>ประเภท</th></tr></thead>
+        <tbody id="trans-tbody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem 0;">ยังไม่มีรายการ</td></tr></tbody>
+      </table>
+    </div>
+    <h3 style="font-size:0.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.8rem;"><i class="bi bi-trophy"></i> Hall of Fame</h3>
+    <div class="hof-grid" id="hof-grid"><p style="color:var(--muted);font-size:0.82rem;">ยังไม่มีผู้สนับสนุน — เป็นคนแรกได้เลย!</p></div>
+  </div>
+
 </div>
 
 <!-- PROJECT POPUP -->
@@ -530,6 +656,73 @@ document.addEventListener('click',function(e){
 
 window.sendComment=function(){};
 window.quickSend=function(){};
+
+// MASCOT ANIMATION
+window.triggerDonationAnim = function() {
+  const amt = parseFloat(document.getElementById('donate-amount').value) || 0;
+  if(amt <= 0) { alert('กรุณาระบุจำนวนเงิน'); return; }
+  
+  const overlay = document.getElementById('mascot-overlay');
+  const char = document.getElementById('mascot-char');
+  const bag = document.getElementById('mascot-bag');
+  const title = document.getElementById('mascot-title');
+  const subtitle = document.getElementById('mascot-subtitle');
+  const amtEl = document.getElementById('mascot-amount');
+  
+  amtEl.textContent = '฿' + amt.toLocaleString();
+  
+  if(amt <= 500) {
+    char.textContent = '🏃';
+    bag.textContent = '💰';
+    char.className = 'mascot-char run';
+    title.textContent = 'วิ่งแบกถุงเงินมาส่ง!';
+    subtitle.textContent = 'บริจาค ' + amt.toLocaleString() + ' บาท ขอบคุณมากครับ! 🙏';
+  } else if(amt <= 5000) {
+    char.textContent = '🚶';
+    bag.textContent = '👜';
+    char.className = 'mascot-char walk-slow';
+    title.textContent = 'เดินถือกระเป๋าเงินมาส่ง!';
+    subtitle.textContent = 'บริจาค ' + amt.toLocaleString() + ' บาท ใจดีมากเลย! 💜';
+  } else {
+    char.textContent = '😤';
+    bag.textContent = '🎒';
+    char.className = 'mascot-char drag';
+    title.textContent = 'ลากถุงเงินยักษ์มาส่ง!!';
+    subtitle.textContent = 'บริจาค ' + amt.toLocaleString() + ' บาท คุณคือฮีโร่! 🌟';
+  }
+  
+  // Set bag position to follow char
+  bag.style.left = '-20px';
+  
+  // Confetti
+  const confetti = document.getElementById('confetti-container');
+  confetti.innerHTML = '';
+  const colors = ['#a78bfa','#4ade80','#fbbf24','#f87171','#60a5fa'];
+  for(let i = 0; i < 30; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'confetti';
+    dot.style.cssText = `left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${1+Math.random()*2}s;animation-delay:${Math.random()*1}s;`;
+    confetti.appendChild(dot);
+  }
+  
+  overlay.classList.add('show');
+  
+  // After animation completes show "arrived" message
+  const duration = amt <= 500 ? 2800 : amt <= 5000 ? 3200 : 4200;
+  setTimeout(() => {
+    char.style.animation = 'none';
+    char.textContent = '✅';
+    bag.textContent = '';
+    title.textContent = 'เงินถึงบริษัทแล้ว!';
+    subtitle.textContent = 'ขอบคุณที่สนับสนุน SparkOne นะครับ 💜';
+  }, duration);
+};
+
+window.closeMascot = function() {
+  document.getElementById('mascot-overlay').classList.remove('show');
+  document.getElementById('donate-amount').value = '';
+};
+
 </script>
 
 <script type="module">
@@ -777,5 +970,21 @@ async function loadTransparency(){
   }catch(e){console.error(e);}
 }
 </script>
+
+<!-- MASCOT ANIMATION OVERLAY -->
+<div class="mascot-overlay" id="mascot-overlay">
+  <div id="confetti-container" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
+  <div class="mascot-amount" id="mascot-amount"></div>
+  <div class="mascot-scene" id="mascot-scene">
+    <div class="mascot-char" id="mascot-char" style="left:-60px;bottom:0;"></div>
+    <div class="mascot-bag" id="mascot-bag" style="left:-20px;"></div>
+  </div>
+  <div class="mascot-msg">
+    <h3 id="mascot-title"></h3>
+    <p id="mascot-subtitle"></p>
+  </div>
+  <button class="mascot-close-btn" onclick="closeMascot()">ขอบคุณมาก! 🙏</button>
+</div>
+
 </body>
 </html>
