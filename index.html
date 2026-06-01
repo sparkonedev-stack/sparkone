@@ -19,7 +19,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 #sidebar.open{transform:translateX(0);}
 #sidebar::after{content:'';position:absolute;bottom:0;right:0;width:180px;height:180px;background:radial-gradient(circle,rgba(120,80,255,0.08) 0%,transparent 70%);pointer-events:none;}
 .sb-header{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.sb-logo{height:72px;object-fit:contain;filter:brightness(0) invert(1);}
+.sb-logo{height:90px;object-fit:contain;filter:brightness(0) invert(1);}
 .sb-close{background:transparent;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;}
 .sb-close:hover{background:var(--border);color:var(--accent);}
 .sb-user{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
@@ -51,7 +51,7 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
 .hdr-left{display:flex;align-items:center;gap:10px;}
 .menu-btn{background:transparent;border:none;color:var(--accent);font-size:1.3rem;cursor:pointer;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
 .menu-btn:hover{background:var(--border);}
-.hdr-logo{height:44px;object-fit:contain;filter:brightness(0) invert(1);}
+.hdr-logo{height:52px;object-fit:contain;filter:brightness(0) invert(1);}
 .hdr-av{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);overflow:hidden;cursor:pointer;background:#18181b;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.8rem;}
 .hdr-av img{width:100%;height:100%;object-fit:cover;}
 .hdr-login{background:rgba(255,255,255,0.08);border:1px solid var(--border);color:var(--accent);padding:6px 13px;border-radius:8px;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:6px;}
@@ -208,7 +208,7 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
 .modal-box{background:rgba(255,255,255,0.06);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,0.1);box-shadow:0 12px 60px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.07);border-radius:20px;padding:2rem 1.6rem;width:100%;max-width:320px;text-align:center;position:relative;animation:pageIn 0.22s cubic-bezier(0.16,1,0.3,1);}
 .modal-x{position:absolute;top:11px;right:11px;background:rgba(255,255,255,0.07);border:none;color:rgba(255,255,255,0.4);width:25px;height:25px;border-radius:50%;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .modal-x:hover{background:rgba(255,255,255,0.13);color:#fff;}
-.modal-wm{max-width:260px;height:auto;max-height:56px;object-fit:contain;filter:brightness(0) invert(1);margin-bottom:1.3rem;}
+.modal-wm{max-width:300px;height:auto;max-height:72px;object-fit:contain;filter:brightness(0) invert(1);margin-bottom:1.3rem;}
 .modal-box h2{font-size:1rem;font-weight:700;color:#fff;margin-bottom:3px;}
 .modal-sub{font-size:0.8rem;color:rgba(255,255,255,0.4);margin-bottom:1.5rem;}
 .btn-google{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;background:rgba(255,255,255,0.95);color:#111;border:none;border-radius:10px;padding:11px;font-size:0.88rem;font-weight:600;cursor:pointer;transition:background 0.2s;}
@@ -216,6 +216,59 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
 .btn-google svg{width:17px;height:17px;flex-shrink:0;}
 .modal-note{font-size:0.7rem;color:rgba(255,255,255,0.25);margin-top:0.9rem;}
 
+
+/* PROFILE POPUP */
+.profile-popup{position:fixed;top:var(--header-h);right:12px;width:280px;background:#0f0f12;border:1px solid var(--border);border-radius:14px;z-index:90;display:none;animation:pageIn 0.2s cubic-bezier(0.16,1,0.3,1);overflow:hidden;}
+.profile-popup.open{display:block;}
+.pp-header{padding:1.2rem 1.2rem 0.8rem;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.pp-av{width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid var(--border);flex-shrink:0;}
+.pp-av img{width:100%;height:100%;object-fit:cover;}
+.pp-name{font-size:0.88rem;font-weight:700;color:var(--accent);}
+.pp-email{font-size:0.7rem;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;}
+.pp-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-bottom:1px solid var(--border);}
+.pp-stat{padding:0.8rem 0;text-align:center;border-right:1px solid var(--border);}
+.pp-stat:last-child{border-right:none;}
+.pp-stat-num{font-size:1rem;font-weight:700;color:var(--accent);}
+.pp-stat-label{font-size:0.62rem;color:var(--muted);margin-top:1px;}
+.pp-actions{padding:0.8rem;}
+.pp-btn{width:100%;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--text);font-size:0.82rem;cursor:pointer;font-family:inherit;transition:all 0.15s;margin-bottom:6px;text-align:left;}
+.pp-btn:hover{background:rgba(255,255,255,0.06);border-color:#52525b;}
+.pp-btn:last-child{margin-bottom:0;}
+.pp-btn-support{background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.3);color:#a78bfa;}
+.pp-btn-support:hover{background:rgba(167,139,250,0.18);}
+.pp-logout{color:#ef4444;border-color:rgba(239,68,68,0.3);}
+.pp-logout:hover{background:rgba(239,68,68,0.08);}
+/* SUPPORT PAGE */
+.support-hero{text-align:center;padding:2rem 1rem;margin-bottom:2rem;}
+.support-hero h2{font-size:1.5rem;font-weight:800;color:var(--accent);margin-bottom:0.5rem;}
+.support-hero p{font-size:0.85rem;color:var(--muted);max-width:500px;margin:0 auto;}
+.support-notice{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.5rem;font-size:0.82rem;color:#fbbf24;display:flex;gap:8px;align-items:flex-start;}
+.support-notice i{flex-shrink:0;margin-top:1px;}
+.support-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px;margin-bottom:2rem;}
+.support-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;}
+.support-card h3{font-size:1rem;font-weight:700;color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:7px;}
+.qr-placeholder{width:160px;height:160px;background:#18181b;border:2px dashed var(--border);border-radius:10px;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--muted);font-size:0.75rem;}
+.qr-placeholder i{font-size:2rem;}
+.bank-info{background:#18181b;border-radius:8px;padding:0.8rem;text-align:left;font-size:0.82rem;}
+.bank-info .bank-name{font-weight:700;color:var(--accent);margin-bottom:3px;}
+.bank-info .bank-acc{font-size:1rem;font-weight:700;color:#a78bfa;letter-spacing:1px;}
+.bank-info .bank-owner{font-size:0.75rem;color:var(--muted);margin-top:2px;}
+/* TRANSPARENCY PAGE */
+.transparency-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;margin-bottom:2rem;}
+.trans-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;text-align:center;}
+.trans-num{font-size:1.5rem;font-weight:800;color:var(--accent);}
+.trans-label{font-size:0.75rem;color:var(--muted);margin-top:3px;}
+.trans-table{width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:2rem;}
+.trans-table th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);color:var(--muted);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;}
+.trans-table td{padding:10px 12px;border-bottom:1px solid #18181b;color:var(--text);}
+.trans-table tr:last-child td{border-bottom:none;}
+.trans-income{color:#4ade80;}
+.trans-expense{color:#f87171;}
+.hof-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;}
+.hof-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.8rem;text-align:center;}
+.hof-av{width:36px;height:36px;border-radius:50%;background:#18181b;margin:0 auto 5px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:var(--muted);}
+.hof-name{font-size:0.72rem;font-weight:600;color:var(--accent);}
+.hof-amt{font-size:0.68rem;color:#a78bfa;}
 /* scrollbar */
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -243,6 +296,8 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
     <button class="nav-item" id="ni-updates" onclick="switchView('updates')"><i class="bi bi-megaphone"></i> อัพเดตจาก Official</button>
     <button class="nav-item" id="ni-projects" onclick="switchView('projects')"><i class="bi bi-grid-3x3-gap"></i> All Projects</button>
     <button class="nav-item" id="ni-contact" onclick="switchView('contact')"><i class="bi bi-envelope"></i> ติดต่อเรา</button>
+    <button class="nav-item" id="ni-support" onclick="switchView('support')"><i class="bi bi-heart"></i> สนับสนุนโปรเจค</button>
+    <button class="nav-item" id="ni-transparency" onclick="switchView('transparency')"><i class="bi bi-bar-chart-line"></i> รายงานการเงิน</button>
   </nav>
   <div class="sb-policy">
     <strong><i class="bi bi-shield-check"></i> นโยบายการใช้งานเนื้อหา</strong>
@@ -304,6 +359,34 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
       ลงชื่อเข้าใช้ด้วย Google
     </button>
     <p class="modal-note">ข้อมูลของคุณจะถูกเก็บรักษาอย่างปลอดภัย</p>
+  </div>
+</div>
+
+
+<!-- PROFILE POPUP -->
+<div class="profile-popup" id="profile-popup">
+  <div class="pp-header">
+    <div class="pp-av"><img id="pp-img" src="" alt=""></div>
+    <div>
+      <div class="pp-name" id="pp-name-txt"></div>
+      <div class="pp-email" id="pp-email-txt"></div>
+    </div>
+  </div>
+  <div class="pp-stats">
+    <div class="pp-stat"><div class="pp-stat-num" id="pp-likes">0</div><div class="pp-stat-label">ไลค์</div></div>
+    <div class="pp-stat"><div class="pp-stat-num" id="pp-comments">0</div><div class="pp-stat-label">คอมเมนต์</div></div>
+    <div class="pp-stat"><div class="pp-stat-num" id="pp-support-amt">0</div><div class="pp-stat-label">บาท</div></div>
+  </div>
+  <div class="pp-actions">
+    <button class="pp-btn pp-btn-support" onclick="switchView('support');closeProfile();closeSidebar();">
+      <i class="bi bi-heart-fill"></i> สนับสนุนโปรเจค
+    </button>
+    <button class="pp-btn" onclick="switchView('transparency');closeProfile();closeSidebar();">
+      <i class="bi bi-bar-chart-line"></i> รายงานการเงิน
+    </button>
+    <button class="pp-btn pp-logout" id="pp-logout-btn">
+      <i class="bi bi-box-arrow-right"></i> ออกจากระบบ
+    </button>
   </div>
 </div>
 
@@ -431,6 +514,20 @@ window.openProject=function(id){const p=projects[id];if(!p)return;document.getEl
 window.closeProject=function(){document.getElementById('proj-popup').classList.remove('open');};
 window.closeProjIfBg=function(e){if(e.target.id==='proj-popup')closeProject();};
 
+// PROFILE POPUP
+window.toggleProfile=function(){
+  const pp=document.getElementById('profile-popup');
+  pp.classList.toggle('open');
+};
+window.closeProfile=function(){
+  document.getElementById('profile-popup').classList.remove('open');
+};
+document.addEventListener('click',function(e){
+  const pp=document.getElementById('profile-popup');
+  const btn=document.getElementById('hdr-av-btn');
+  if(pp&&btn&&!pp.contains(e.target)&&!btn.contains(e.target))pp.classList.remove('open');
+});
+
 window.sendComment=function(){};
 window.quickSend=function(){};
 </script>
@@ -454,8 +551,18 @@ onAuthStateChanged(auth,user=>{
   const isAdmin=user&&user.email===ADMIN;
   // header
   document.getElementById('hdr-auth').innerHTML=user
-    ?`<div class="hdr-av" onclick="toggleSidebar()"><img src="${user.photoURL}" alt=""></div>`
+    ?`<div class="hdr-av" onclick="toggleProfile()" id="hdr-av-btn"><img src="${user.photoURL}" alt=""></div>`
     :`<button class="hdr-login" onclick="openLoginModal()"><i class="bi bi-google"></i> Sign in</button>`;
+  // profile popup data
+  if(user){
+    const pp=document.getElementById('profile-popup');
+    document.getElementById('pp-img').src=user.photoURL||'';
+    document.getElementById('pp-name-txt').textContent=user.displayName+(isAdmin?' [ADMIN]':'');
+    document.getElementById('pp-email-txt').textContent=user.email;
+    document.getElementById('pp-logout-btn').onclick=()=>{signOut(auth);closeProfile();};
+    loadUserStats(user.uid);
+    loadTransparency();
+  }
   // sidebar
   if(user){
     document.getElementById('sb-av').innerHTML=`<img src="${user.photoURL}" alt="">`;
@@ -606,6 +713,69 @@ function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g
 function relTime(d){const s=Math.floor((Date.now()-d)/1000);if(s<60)return'เมื่อกี้';if(s<3600)return Math.floor(s/60)+' นาทีที่แล้ว';if(s<86400)return Math.floor(s/3600)+' ชม.ที่แล้ว';return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});}
 
 fetchPosts();
+
+// LOAD USER STATS (likes/comments count from sessionStorage + Firestore)
+async function loadUserStats(uid){
+  try{
+    // count comments by user
+    const cq=query(collection(db,'comments'),where('userId','==',uid));
+    const csnap=await getDocs(cq);
+    document.getElementById('pp-comments').textContent=csnap.size;
+    // count support amount
+    const sq=query(collection(db,'supporters'),where('userId','==',uid));
+    const ssnap=await getDocs(sq);
+    let total=0;ssnap.forEach(d=>{total+=(d.data().amount||0);});
+    document.getElementById('pp-support-amt').textContent=total.toLocaleString();
+    // likes from session (approximate)
+    let likeCount=0;
+    for(let k in sessionStorage){if(k.startsWith('lk_'))likeCount++;}
+    document.getElementById('pp-likes').textContent=likeCount;
+  }catch(e){console.error(e);}
+}
+
+// LOAD TRANSPARENCY DATA
+async function loadTransparency(){
+  try{
+    // transactions
+    const tq=query(collection(db,'transactions'),orderBy('date','desc'));
+    const tsnap=await getDocs(tq);
+    let income=0,expense=0;
+    const tbody=document.getElementById('trans-tbody');
+    if(tbody&&!tsnap.empty){
+      tbody.innerHTML='';
+      tsnap.forEach(d=>{
+        const t=d.data();
+        if(t.type==='income')income+=(t.amount||0);
+        else expense+=(t.amount||0);
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${t.date||''}</td><td>${t.desc||''}</td><td class="${t.type==='income'?'trans-income':'trans-expense'}">${t.type==='income'?'+':'-'}฿${(t.amount||0).toLocaleString()}</td><td>${t.type==='income'?'รับเข้า':'จ่ายออก'}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    const inc=document.getElementById('total-income');
+    const exp=document.getElementById('total-expense');
+    const bal=document.getElementById('total-balance');
+    if(inc)inc.textContent='฿'+income.toLocaleString();
+    if(exp)exp.textContent='฿'+expense.toLocaleString();
+    if(bal){bal.textContent='฿'+(income-expense).toLocaleString();bal.style.color=(income-expense)>=0?'#4ade80':'#f87171';}
+    // supporters
+    const sq=query(collection(db,'supporters'),orderBy('amount','desc'));
+    const ssnap=await getDocs(sq);
+    const supp=document.getElementById('total-supporters');
+    if(supp)supp.textContent=ssnap.size;
+    const hof=document.getElementById('hof-grid');
+    if(hof&&!ssnap.empty){
+      hof.innerHTML='';
+      ssnap.forEach(d=>{
+        const s=d.data();
+        if(!s.showName)return;
+        const item=document.createElement('div');item.className='hof-item';
+        item.innerHTML=`<div class="hof-av">${s.photoURL?`<img src="${s.photoURL}" style="width:100%;height:100%;object-fit:cover;">`:'<i class="bi bi-person"></i>'}</div><div class="hof-name">${s.name||'Anonymous'}</div><div class="hof-amt">฿${(s.amount||0).toLocaleString()}</div>`;
+        hof.appendChild(item);
+      });
+    }
+  }catch(e){console.error(e);}
+}
 </script>
 </body>
 </html>
