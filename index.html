@@ -51,7 +51,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
 }
-.sidebar-logo { height: 44px; object-fit: contain; filter: brightness(0) invert(1); }
+.sidebar-logo { height: 80px; object-fit: contain; filter: brightness(0) invert(1); }
 .sidebar-close {
   background: transparent; border: none; color: var(--muted);
   font-size: 1.1rem; cursor: pointer; width: 28px; height: 28px;
@@ -122,7 +122,7 @@ header {
   border-radius: 8px; display: flex; align-items: center; justify-content: center;
 }
 .menu-btn:hover { background: var(--border); }
-.header-logo { height: 44px; object-fit: contain; filter: brightness(0) invert(1); }
+.header-logo { height: 52px; object-fit: contain; filter: brightness(0) invert(1); }
 .header-user-avatar {
   width: 32px; height: 32px; border-radius: 50%;
   border: 1px solid var(--border); overflow: hidden; cursor: pointer;
@@ -224,7 +224,7 @@ header {
 .post-img { width: 100%; max-height: 340px; object-fit: cover; border-radius: 8px; margin-top: 1.2rem; border: 1px solid var(--border); }
 
 /* ── COMMENT ── */
-.comment-section { margin-top: 1.5rem; padding-top: 1.2rem; border-top: 1px solid var(--border); }
+.comment-section { margin-top: 0; padding-top: 0; border: none; display: none; }
 .comment-title { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
 .comment-login-prompt {
   background: rgba(255,255,255,0.03); border: 1px dashed var(--border);
@@ -365,7 +365,7 @@ header {
 .modal-close-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
 .modal-logo-wrap { margin-bottom: 1.4rem; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .modal-wordmark {
-  max-width: 240px; height: auto; max-height: 40px;
+  max-width: 300px; height: auto; max-height: 64px;
   object-fit: contain;
   filter: brightness(0) invert(1);
 }
@@ -662,7 +662,7 @@ window.sendComment = function() {};
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, getDocs, addDoc, query, orderBy, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, query, orderBy, where, onSnapshot, serverTimestamp, doc, updateDoc, increment, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const ADMIN_EMAIL = "sparkone.dev@gmail.com";
 const firebaseConfig = {
@@ -726,6 +726,74 @@ onAuthStateChanged(auth, user => {
   }
 });
 
+// Toggle comments
+window.toggleComments = function(pid) {
+  const cs = document.getElementById('cs-' + pid);
+  const chevron = document.getElementById('chevron-' + pid);
+  const isOpen = cs.classList.contains('expanded');
+  cs.classList.toggle('expanded');
+  chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+};
+
+// Like
+window.handleLike = async function(pid) {
+  if (!currentUser) { openLoginModal(); return; }
+  const key = 'like_' + pid;
+  const diskey = 'dislike_' + pid;
+  const liked = sessionStorage.getItem(key);
+  const btn = document.getElementById('like-btn-' + pid);
+  const disbtn = document.getElementById('dislike-btn-' + pid);
+  const ref = doc(db, 'posts', pid);
+  if (liked) {
+    await updateDoc(ref, { likes: increment(-1) });
+    sessionStorage.removeItem(key);
+    btn.classList.remove('liked');
+  } else {
+    await updateDoc(ref, { likes: increment(1) });
+    sessionStorage.setItem(key, '1');
+    btn.classList.add('liked');
+    // remove dislike if exists
+    if (sessionStorage.getItem(diskey)) {
+      await updateDoc(ref, { dislikes: increment(-1) });
+      sessionStorage.removeItem(diskey);
+      disbtn.classList.remove('disliked');
+    }
+  }
+  const snap = await getDoc(ref);
+  const d = snap.data();
+  document.getElementById('like-count-' + pid).textContent = d.likes || 0;
+  document.getElementById('dislike-count-' + pid).textContent = d.dislikes || 0;
+};
+
+// Dislike
+window.handleDislike = async function(pid) {
+  if (!currentUser) { openLoginModal(); return; }
+  const key = 'dislike_' + pid;
+  const likekey = 'like_' + pid;
+  const disliked = sessionStorage.getItem(key);
+  const btn = document.getElementById('dislike-btn-' + pid);
+  const likebtn = document.getElementById('like-btn-' + pid);
+  const ref = doc(db, 'posts', pid);
+  if (disliked) {
+    await updateDoc(ref, { dislikes: increment(-1) });
+    sessionStorage.removeItem(key);
+    btn.classList.remove('disliked');
+  } else {
+    await updateDoc(ref, { dislikes: increment(1) });
+    sessionStorage.setItem(key, '1');
+    btn.classList.add('disliked');
+    if (sessionStorage.getItem(likekey)) {
+      await updateDoc(ref, { likes: increment(-1) });
+      sessionStorage.removeItem(likekey);
+      likebtn.classList.remove('liked');
+    }
+  }
+  const snap = await getDoc(ref);
+  const d = snap.data();
+  document.getElementById('like-count-' + pid).textContent = d.likes || 0;
+  document.getElementById('dislike-count-' + pid).textContent = d.dislikes || 0;
+};
+
 // Fetch posts
 async function fetchPosts() {
   try {
@@ -749,21 +817,37 @@ async function fetchPosts() {
         <h3>${p.title||''}</h3>
         <div class="post-content">${p.content||''}</div>
         ${p.image && p.image!=='null' ? `<img src="${p.image}" class="post-img">` : ''}
-        <div class="comment-section">
-          <div class="comment-title"><i class="bi bi-chat-dots"></i> ความคิดเห็น</div>
-          <div class="comment-login-prompt" style="display:flex;">
-            <p><i class="bi bi-lock"></i> เข้าสู่ระบบเพื่อแสดงความคิดเห็น</p>
-            <button class="btn-login-inline" onclick="openLoginModal()">Sign in</button>
-          </div>
-          <div class="comment-input-row" style="display:none;">
-            <div class="c-av c-av-input"><i class="bi bi-person"></i></div>
-            <div class="c-wrap">
-              <textarea class="c-in" placeholder="เขียนความคิดเห็น..." rows="1"
-                oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
-              <button class="btn-send" onclick="sendComment(this,'${pid}')"><i class="bi bi-send"></i></button>
+        <div class="post-actions">
+          <button class="action-btn" id="like-btn-${pid}" onclick="handleLike('${pid}')">
+            <i class="bi bi-hand-thumbs-up"></i>
+            <span class="action-count" id="like-count-${pid}">${p.likes||0}</span>
+          </button>
+          <button class="action-btn" id="dislike-btn-${pid}" onclick="handleDislike('${pid}')">
+            <i class="bi bi-hand-thumbs-down"></i>
+            <span class="action-count" id="dislike-count-${pid}">${p.dislikes||0}</span>
+          </button>
+          <button class="comment-toggle-btn" onclick="toggleComments('${pid}')">
+            <i class="bi bi-chat-dots"></i>
+            <span id="comment-count-${pid}">0</span> ความคิดเห็น
+            <i class="bi bi-chevron-down" id="chevron-${pid}" style="font-size:0.75rem;margin-left:2px;transition:transform 0.2s;"></i>
+          </button>
+        </div>
+        <div class="comment-section" id="cs-${pid}">
+          <div style="margin-top:1rem;">
+            <div class="comment-login-prompt" style="display:flex;">
+              <p><i class="bi bi-person-lock"></i> เข้าสู่ระบบเพื่อแสดงความคิดเห็น</p>
+              <button class="btn-login-inline" onclick="openLoginModal()"><i class="bi bi-google"></i> Sign in</button>
             </div>
+            <div class="comment-input-row" style="display:none;">
+              <div class="c-av c-av-input"><i class="bi bi-person"></i></div>
+              <div class="c-wrap">
+                <textarea class="c-in" placeholder="เขียนความคิดเห็น..." rows="1"
+                  oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
+                <button class="btn-send" onclick="sendComment(this,'${pid}')"><i class="bi bi-send-fill"></i></button>
+              </div>
+            </div>
+            <div class="c-list" id="cl-${pid}"><p class="c-empty">กำลังโหลด...</p></div>
           </div>
-          <div class="c-list" id="cl-${pid}"><p class="c-empty">กำลังโหลด...</p></div>
         </div>`;
       target.appendChild(card);
       listenComments(pid);
@@ -785,7 +869,9 @@ function listenComments(pid) {
   onSnapshot(q, snap => {
     const el = document.getElementById('cl-'+pid);
     if (!el) return;
-    if (snap.empty) { el.innerHTML = '<p class="c-empty">ยังไม่มีความคิดเห็น</p>'; return; }
+    const countEl = document.getElementById('comment-count-' + pid);
+    if (countEl) countEl.textContent = snap.size;
+    if (snap.empty) { el.innerHTML = '<p class="c-empty">ยังไม่มีความคิดเห็น เป็นคนแรกที่แสดงความเห็น!</p>'; return; }
     el.innerHTML = '';
     snap.forEach(d => {
       const c = d.data();
