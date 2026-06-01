@@ -144,12 +144,21 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
 .c-empty{color:var(--muted);font-size:0.8rem;font-style:italic;padding:4px 0;}
 
 /* SHARE MODAL */
-.share-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);z-index:150;display:none;align-items:flex-end;justify-content:center;padding:0;}
+.share-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:150;display:none;align-items:flex-end;justify-content:center;padding:0;}
 .share-modal-bg.open{display:flex;}
-.share-box{background:rgba(8,8,12,0.96);border:1px solid rgba(255,255,255,0.07);border-radius:20px 20px 0 0;width:100%;max-width:540px;padding:1.4rem 1.4rem 2rem;animation:slideUp 0.25s cubic-bezier(0.16,1,0.3,1);}
-@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
-.share-title{font-size:0.82rem;color:#52525b;text-transform:uppercase;letter-spacing:1px;margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between;}
-.share-close{background:rgba(255,255,255,0.06);border:none;color:var(--muted);font-size:0.9rem;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.share-box{background:rgba(8,8,12,0.97);border:1px solid rgba(255,255,255,0.08);border-top:1px solid rgba(255,255,255,0.1);border-radius:20px 20px 0 0;width:100%;max-width:540px;padding:1.4rem 1.4rem 2.2rem;animation:slideUp 0.25s cubic-bezier(0.16,1,0.3,1);}
+.share-title{font-size:0.8rem;color:#52525b;text-transform:uppercase;letter-spacing:1px;margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between;}
+.share-close{background:rgba(255,255,255,0.06);border:none;color:#71717a;font-size:0.85rem;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.share-close:hover{background:rgba(255,255,255,0.1);color:#fff;}
+.share-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.share-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px 8px;cursor:pointer;transition:all 0.15s;text-decoration:none;color:var(--text);}
+.share-btn:hover{background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.3);}
+.share-btn i{font-size:1.3rem;}
+.share-btn span{font-size:0.68rem;color:#52525b;}
+.share-copy{display:flex;align-items:center;gap:8px;margin-top:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:8px 10px;}
+.share-url{flex:1;font-size:0.75rem;color:#3f3f46;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.share-copy-btn{background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.25);color:#a78bfa;padding:4px 10px;border-radius:6px;font-size:0.75rem;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.share-copy-btn:hover{background:rgba(167,139,250,0.22);}
 .share-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .share-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px 8px;cursor:pointer;transition:all 0.15s;text-decoration:none;color:var(--text);}
 .share-btn:hover{border-color:rgba(167,139,250,0.5);background:rgba(167,139,250,0.08);}
@@ -963,12 +972,7 @@ async function fetchPosts(){
             </button>
           </div>
           <div class="comment-section open" id="cs-${pid}" style="display:block;padding-top:8px;border-top:1px solid var(--border);margin-top:8px;">
-            <div class="c-list" id="cl-${pid}">
-              <div class="skel-card" style="padding:0.8rem;background:transparent;border:none;">
-                <div class="skeleton skel-line" style="width:40%;height:8px;"></div>
-                <div class="skeleton skel-para" style="height:8px;margin-top:6px;"></div>
-              </div>
-            </div>
+            <div class="c-list" id="cl-${pid}"></div>
           </div>`;
         target.appendChild(card);
         listenComments(pid);
@@ -987,15 +991,25 @@ function listenComments(pid){
     const topLevel=[],replies={};
     snap.forEach(d=>{
       const c=d.data();
+      // Strict filter: only comments belonging to THIS post
+      if(c.postId!==pid)return;
       if(!c.parentId||c.parentId===''){topLevel.push({id:d.id,...c});}
       else{if(!replies[c.parentId])replies[c.parentId]=[];replies[c.parentId].push({id:d.id,...c});}
     });
-    // Cache for popup
+    // Check if data actually changed before re-rendering
+    const prev=postCommentData[pid];
+    const prevCount=prev?prev.topLevel.length:null;
+    const changed=prevCount===null||prevCount!==topLevel.length||
+      JSON.stringify(topLevel.map(c=>c.id+c.text+(c.likes||0)))!==
+      JSON.stringify((prev.topLevel||[]).map(c=>c.id+c.text+(c.likes||0)));
+    // Always cache
     postCommentData[pid]={topLevel,replies};
-    const el=document.getElementById('cl-'+pid);if(!el)return;
     const cc=document.getElementById('cc-'+pid);if(cc)cc.textContent=topLevel.length;
-    // Render preview (first 2 comments) under post
-    renderCommentPreview(pid,topLevel,replies);
+    // Only re-render if something changed
+    if(changed){
+      const el=document.getElementById('cl-'+pid);if(!el)return;
+      renderCommentPreview(pid,topLevel,replies);
+    }
     // If popup is open for this post, refresh it
     if(document.getElementById('comment-popup').classList.contains('open')&&window._popupPid===pid){
       renderPopupComments(pid);
