@@ -779,7 +779,7 @@ onSnapshot(collection(db, 'projects'), (snapshot) => {
     }
   });
 });
-window.openProject=function(id){const p=projects[id];if(!p)return;document.getElementById('pp-logo').src=p.logo;document.getElementById('pp-name').textContent=p.name;document.getElementById('pp-tagline').textContent=p.tagline;document.getElementById('pp-overview').textContent=p.overview;document.getElementById('pp-problem').textContent=p.problem;document.getElementById('pp-bar').style.width=p.progress+'%';document.getElementById('pp-prog-txt').textContent=p.progressText;document.getElementById('pp-tags').innerHTML=(p.tags||[]).map(t=>`<span class="popup-tag">${t}</span>`).join('');document.getElementById('proj-popup').classList.add('open');};
+window.openProject=function(id){const p=projects[id];if(!p)return;document.getElementById('pp-logo').src=p.logo;document.getElementById('pp-name').textContent=p.name;document.getElementById('pp-tagline').textContent=p.tagline;document.getElementById('pp-overview').textContent=p.overview;document.getElementById('pp-problem').textContent=p.problem;document.getElementById('pp-bar').style.width=p.progress+'%';document.getElementById('pp-prog-txt').textContent=p.progressText;const tArr=Array.isArray(p.tags)?p.tags:(typeof p.tags==='string'?p.tags.split(','):[]);document.getElementById('pp-tags').innerHTML=tArr.map(t=>`<span class="popup-tag">${t}</span>`).join('');document.getElementById('proj-popup').classList.add('open');};
 window.closeProject=function(){document.getElementById('proj-popup').classList.remove('open');};
 window.closeProjIfBg=function(e){if(e.target.id==='proj-popup')closeProject();};
 
