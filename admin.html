@@ -199,9 +199,20 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                    selectedImage = e.target.result;
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, h = img.height;
+                        if(w > 800) { h = Math.round(h*800/w); w = 800; }
+                        canvas.width = w; canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        const compUrl = canvas.toDataURL('image/jpeg', 0.7); // บีบอัดให้เหลือ 70%
+                        preview.src = compUrl;
+                        preview.style.display = 'block';
+                        selectedImage = compUrl;
+                    };
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             } else {
@@ -314,9 +325,20 @@
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        projPreview.src = e.target.result;
-                        projPreview.style.display = 'block';
-                        selectedProjLogo = e.target.result;
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            let w = img.width, h = img.height;
+                            if(w > 400) { h = Math.round(h*400/w); w = 400; }
+                            canvas.width = w; canvas.height = h;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, w, h);
+                            const compUrl = canvas.toDataURL('image/jpeg', 0.7); // บีบอัดให้เหลือ 70%
+                            projPreview.src = compUrl;
+                            projPreview.style.display = 'block';
+                            selectedProjLogo = compUrl;
+                        };
+                        img.src = e.target.result;
                     };
                     reader.readAsDataURL(file);
                 } else {
