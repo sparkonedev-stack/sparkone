@@ -6,21 +6,36 @@
     <style>
         :root { --bg-color: #050505; --card-bg: #0f0f12; --accent-color: #ffffff; --text-color: #e4e4e7; --text-muted: #a1a1aa; --border-color: #27272a; --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); line-height: 1.6; padding: 2rem 1rem; }
-        .admin-container { max-width: 800px; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--border-color); padding: 2rem; border-radius: 16px; }
-        .admin-container h2 { margin-bottom: 1.5rem; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; color: var(--accent-color); }
+        body { background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); line-height: 1.6; display: flex; min-height: 100vh; overflow-x: hidden; }
         
-        /* Nav Tabs */
-        .admin-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
-        .tab-btn { background: #18181b; color: var(--text-muted); border: 1px solid var(--border-color); padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: 0.15s; }
-        .tab-btn.active { background: var(--accent-color); color: #000; border-color: var(--accent-color); }
+        /* Sidebar Menu */
+        .sidebar { width: 260px; background: #000; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 2rem 0; position: fixed; height: 100vh; top: 0; left: 0; z-index: 10; }
+        .sidebar-header { padding: 0 1.5rem 2rem 1.5rem; }
+        .sidebar-header h2 { color: var(--accent-color); font-size: 1.5rem; margin-bottom: 0.2rem; }
+        .sidebar-header p { color: var(--text-muted); font-size: 0.85rem; }
         
+        .menu-group { margin-bottom: 1.5rem; }
+        .menu-label { padding: 0 1.5rem; font-size: 0.75rem; color: #71717a; font-weight: 600; margin-bottom: 0.5rem; letter-spacing: 1px; }
+        
+        .tab-btn { width: 100%; text-align: left; background: transparent; color: var(--text-muted); border: none; padding: 0.8rem 1.5rem; cursor: pointer; font-size: 0.95rem; transition: 0.2s; border-left: 3px solid transparent; }
+        .tab-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-color); }
+        .tab-btn.active { background: rgba(255,255,255,0.1); color: var(--accent-color); border-left-color: var(--accent-color); font-weight: 500; }
+        
+        /* Main Content */
+        .main-layout { flex: 1; margin-left: 260px; display: flex; flex-direction: column; min-height: 100vh; width: calc(100% - 260px); }
+        .topbar { height: 70px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 2rem; background: var(--card-bg); position: sticky; top: 0; z-index: 5; }
+        .topbar h1 { font-size: 1.2rem; font-weight: 500; color: var(--text-color); margin: 0; }
+        
+        .content-wrapper { padding: 2rem; flex: 1; }
+        .admin-container { max-width: 800px; background: var(--bg-color); border: 1px solid var(--border-color); padding: 2rem; border-radius: 12px; }
+        
+        /* Forms & Lists */
         .admin-section { display: none; }
         .admin-section.active { display: block; }
-
         .form-group { margin-bottom: 1.5rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
         .form-group input, .form-group textarea, .form-group select { width: 100%; background: #050505; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.8rem 1rem; color: var(--text-color); font-family: var(--font-family); font-size: 1rem; outline: none; transition: border-color 0.2s; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-color); }
         
         .btn { background: var(--accent-color); color: #000000; border: none; padding: 0.8rem 2rem; font-weight: 600; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: opacity 0.2s; margin-bottom: 1rem;}
         .btn:hover { opacity: 0.9; }
@@ -29,25 +44,47 @@
         .btn-secondary { background: #27272a; color: #fff; }
         
         .item-list { display: flex; flex-direction: column; gap: 10px; margin-top: 1rem; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #050505; border: 1px solid var(--border-color); border-radius: 8px; }
-        .list-item-info h4 { font-size: 1rem; color: var(--text-color); }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #0f0f12; border: 1px solid var(--border-color); border-radius: 8px; }
+        .list-item-info h4 { font-size: 1rem; color: var(--text-color); margin-bottom: 4px; }
         .list-item-info p { font-size: 0.8rem; color: var(--text-muted); }
         .item-actions { display: flex; gap: 8px; }
         .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; margin-bottom: 0; }
+        
+        /* Mobile Fix */
+        @media (max-width: 768px) {
+            .sidebar { width: 200px; }
+            .main-layout { margin-left: 200px; width: calc(100% - 200px); }
+        }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <h2>SparkOne - ระบบจัดการหลังบ้าน</h2>
-        
-        <div class="admin-tabs">
-            <button class="tab-btn active" onclick="switchTab('post-create')">จัดการโพสต์ > โพสต์</button>
-            <button class="tab-btn" onclick="switchTab('post-manage')">จัดการโพสต์ > แก้ไขโพสต์</button>
-            <button class="tab-btn" onclick="switchTab('proj-create')">จัดการโปรเจค > โพสต์โปรเจค</button>
-            <button class="tab-btn" onclick="switchTab('proj-manage')">จัดการโปรเจค > อัปเดตโปรเจค</button>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>SparkOne</h2>
+            <p>ระบบจัดการหลังบ้าน</p>
         </div>
-
-        <div id="post-create" class="admin-section active">
+        
+        <div class="menu-group">
+            <p class="menu-label">โพสต์ข่าวสาร</p>
+            <button class="tab-btn active" onclick="switchTab('post-create', 'สร้างโพสต์ใหม่')">สร้างโพสต์ใหม่</button>
+            <button class="tab-btn" onclick="switchTab('post-manage', 'จัดการโพสต์')">จัดการโพสต์</button>
+        </div>
+        
+        <div class="menu-group">
+            <p class="menu-label">โปรเจกต์</p>
+            <button class="tab-btn" onclick="switchTab('proj-create', 'เพิ่มโปรเจกต์ใหม่')">เพิ่มโปรเจกต์ใหม่</button>
+            <button class="tab-btn" onclick="switchTab('proj-manage', 'จัดการโปรเจกต์')">จัดการโปรเจกต์</button>
+        </div>
+    </aside>
+    
+    <main class="main-layout">
+        <header class="topbar">
+            <h1 id="page-title">สร้างโพสต์ใหม่</h1>
+        </header>
+        
+        <div class="content-wrapper">
+            <div class="admin-container">
+                <div id="post-create" class="admin-section active">
             <form id="post-form">
                 <input type="hidden" id="edit-post-id">
                 <div class="form-group">
@@ -128,7 +165,9 @@
             <h3>รายการโปรเจกต์ทั้งหมด</h3>
             <div class="item-list" id="projects-list-target"></div>
         </div>
-    </div>
+                </div>
+            </div>
+        </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -147,12 +186,7 @@
         const db = getFirestore(app);
 
         // Tab Switcher
-        window.switchTab = function(tabId) {
-            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
-        };
+        window.switchTab = function(tabId, title) { document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(tabId).classList.add('active'); if(event && event.currentTarget) event.currentTarget.classList.add('active'); if(title) document.getElementById('page-title').innerText = title; };
 
         // --- POSTS ---
         const imageInput = document.getElementById('imageInput');
@@ -212,7 +246,7 @@
             document.getElementById('post-form-mode').innerText = "กำลังแก้ไขโพสต์...";
             document.getElementById('submitBtn').innerText = "อัปเดตข้อมูลโพสต์";
             document.getElementById('cancelPostEditBtn').style.display = 'inline-block';
-            switchTab('post-create');
+            switchTab('post-create', 'แก้ไขโพสต์');
         };
 
         window.resetPostForm = function() {
@@ -278,7 +312,7 @@
                 listTarget.innerHTML += `
                     <div class="list-item">
                         <div class="list-item-info">
-                            <h4>${p.name || ''}</h4>
+                            <h4>${p.name || id || 'โปรเจกต์ไม่มีชื่อ'}</h4>
                             <p>ความคืบหน้า: ${p.progress || 0}% [${p.status || ''}]</p>
                         </div>
                         <div class="item-actions">
@@ -305,7 +339,7 @@
             document.getElementById('proj-form-mode').innerText = "กำลังแก้ไขโปรเจกต์...";
             document.getElementById('projSubmitBtn').innerText = "อัปเดตข้อมูลโปรเจกต์";
             document.getElementById('cancelProjEditBtn').style.display = 'inline-block';
-            switchTab('proj-create');
+            switchTab('proj-create', 'แก้ไขโปรเจกต์');
         };
 
         window.resetProjForm = function() {
