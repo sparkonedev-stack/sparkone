@@ -759,8 +759,27 @@ window.openAiSharePicker=function(text,url){
   document.body.appendChild(m);
 };
 // PROJECTS
-const projects={nova:{name:'NOVA',tagline:'AI Personal Agent — Next-Generation Intelligence',logo:'https://raw.githubusercontent.com/sparkonedev-stack/assets/main/1780154700538_image_repair_1780258904130.png',overview:'NOVA คือ AI Agent ผู้ช่วยส่วนตัวขั้นสูง ที่จดจำ เข้าใจ และดูแลชีวิตประจำวันของคุณผ่านระบบ Infinite Memory และ Proactive Automation',problem:'แก้ปัญหา AI ที่ลืมทุกอย่างหลังปิดแชท ไม่รู้จักบริบทชีวิตจริงของผู้ใช้ และไม่สามารถทำงานเชิงรุกได้',progress:35,progressText:'Phase 1 — Core Memory System (35%)',tags:['Python','LLM','Firebase','Node.js','WebSocket']}};
-window.openProject=function(id){const p=projects[id];if(!p)return;document.getElementById('pp-logo').src=p.logo;document.getElementById('pp-name').textContent=p.name;document.getElementById('pp-tagline').textContent=p.tagline;document.getElementById('pp-overview').textContent=p.overview;document.getElementById('pp-problem').textContent=p.problem;document.getElementById('pp-bar').style.width=p.progress+'%';document.getElementById('pp-prog-txt').textContent=p.progressText;document.getElementById('pp-tags').innerHTML=p.tags.map(t=>`<span class="popup-tag">${t}</span>`).join('');document.getElementById('proj-popup').classList.add('open');};
+let projects = {};
+onSnapshot(collection(db, 'projects'), (snapshot) => {
+  const grid = document.querySelector('.projects-grid');
+  if (grid) grid.innerHTML = '';
+  snapshot.forEach(doc => {
+    const id = doc.id;
+    const p = doc.data();
+    projects[id] = p;
+    if (grid) {
+      const isLive = p.status && p.status.toLowerCase().includes('live');
+      grid.innerHTML += `
+      <div class="project-card" onclick="openProject('${id}')">
+        <img src="${p.logo||''}" class="project-logo" alt="${p.name||''}" onerror="this.style.display='none'">
+        <div class="project-name">${p.name||''}</div>
+        <span class="project-status ${isLive ? 'status-live' : 'status-dev'}">${p.status||'In Development'}</span>
+        <p class="project-desc">${p.tagline||''}</p>
+      </div>`;
+    }
+  });
+});
+window.openProject=function(id){const p=projects[id];if(!p)return;document.getElementById('pp-logo').src=p.logo;document.getElementById('pp-name').textContent=p.name;document.getElementById('pp-tagline').textContent=p.tagline;document.getElementById('pp-overview').textContent=p.overview;document.getElementById('pp-problem').textContent=p.problem;document.getElementById('pp-bar').style.width=p.progress+'%';document.getElementById('pp-prog-txt').textContent=p.progressText;document.getElementById('pp-tags').innerHTML=(p.tags||[]).map(t=>`<span class="popup-tag">${t}</span>`).join('');document.getElementById('proj-popup').classList.add('open');};
 window.closeProject=function(){document.getElementById('proj-popup').classList.remove('open');};
 window.closeProjIfBg=function(e){if(e.target.id==='proj-popup')closeProject();};
 
