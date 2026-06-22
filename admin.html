@@ -129,8 +129,9 @@
                     <input type="text" id="proj-tagline" required>
                 </div>
                 <div class="form-group">
-                    <label>ลิงก์รูปภาพโลโก้โปรเจกต์</label>
-                    <input type="text" id="proj-logo" required>
+                    <label>อัปโหลดรูปภาพโลโก้โปรเจกต์</label>
+                    <input type="file" id="proj-logo-file" accept="image/*">
+                    <img id="proj-preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px; margin-top: 1rem; display: none; border: 1px solid var(--border-color);">
                 </div>
                 <div class="form-group">
                     <label>สถานะ (Status เช่น In Development, Live)</label>
@@ -303,6 +304,27 @@
         });
 
         // --- PROJECTS ---
+        const projLogoFile = document.getElementById('proj-logo-file');
+        const projPreview = document.getElementById('proj-preview');
+        let selectedProjLogo = "null";
+
+        if(projLogoFile) {
+            projLogoFile.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        projPreview.src = e.target.result;
+                        projPreview.style.display = 'block';
+                        selectedProjLogo = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    projPreview.style.display = 'none';
+                    selectedProjLogo = "null";
+                }
+            });
+        }
         onSnapshot(collection(db, "projects"), (snapshot) => {
             const listTarget = document.getElementById('projects-list-target');
             listTarget.innerHTML = '';
@@ -328,7 +350,14 @@
             document.getElementById('edit-proj-id').value = id;
             document.getElementById('proj-name').value = name;
             document.getElementById('proj-tagline').value = tagline;
-            document.getElementById('proj-logo').value = logo;
+            if (logo && logo !== 'null') {
+                document.getElementById('proj-preview').src = logo;
+                document.getElementById('proj-preview').style.display = 'block';
+                selectedProjLogo = logo;
+            } else {
+                document.getElementById('proj-preview').style.display = 'none';
+                selectedProjLogo = "null";
+            }
             document.getElementById('proj-status').value = status;
             document.getElementById('proj-progress').value = progress;
             document.getElementById('proj-progressText').value = progressText;
@@ -348,6 +377,9 @@
             document.getElementById('proj-form-mode').innerText = "ชื่อโปรเจกต์ (เช่น NOVA, CheckBank)";
             document.getElementById('projSubmitBtn').innerText = "บันทึกโปรเจกต์";
             document.getElementById('cancelProjEditBtn').style.display = 'none';
+            if(document.getElementById('proj-preview')) document.getElementById('proj-preview').style.display = 'none';
+            if(document.getElementById('proj-logo-file')) document.getElementById('proj-logo-file').value = '';
+            selectedProjLogo = "null";
         };
 
         window.deleteProj = async function(id) {
@@ -367,7 +399,7 @@
 
             const name = document.getElementById('proj-name').value;
             const tagline = document.getElementById('proj-tagline').value;
-            const logo = document.getElementById('proj-logo').value;
+            const logo = selectedProjLogo;
             const status = document.getElementById('proj-status').value;
             const progress = parseInt(document.getElementById('proj-progress').value) || 0;
             const progressText = document.getElementById('proj-progressText').value;
