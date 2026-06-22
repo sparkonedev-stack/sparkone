@@ -4,50 +4,135 @@
     <meta charset="UTF-8">
     <title>แอดมินพอร์ทัล - SparkOne</title>
     <style>
-        :root { --bg-color: #050505; --card-bg: #0f0f12; --accent-color: #ffffff; --text-color: #e4e4e7; --text-muted: #a1a1aa; --border-color: #27272a; --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; } 
-        * { box-sizing: border-box; margin: 0; padding: 0; } 
-        body { background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); line-height: 1.6; padding: 4rem 2rem; }
-        .admin-container { max-width: 700px; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--border-color); padding: 3rem; border-radius: 16px; } 
-        .admin-container h2 { margin-bottom: 1.5rem; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; color: var(--accent-color); } 
-        .form-group { margin-bottom: 1.5rem; } 
-        .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted); } 
-        .form-group input, .form-group textarea, .form-group select { width: 100%; background: #050505; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.8rem 1rem; color: var(--text-color); font-family: var(--font-family); font-size: 1rem; outline: none; transition: border-color 0.2s; } 
-        .btn { background: var(--accent-color); color: #000000; border: none; padding: 0.8rem 2rem; font-weight: 600; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: opacity 0.2s; margin-bottom: 1rem;} 
+        :root { --bg-color: #050505; --card-bg: #0f0f12; --accent-color: #ffffff; --text-color: #e4e4e7; --text-muted: #a1a1aa; --border-color: #27272a; --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); line-height: 1.6; padding: 2rem 1rem; }
+        .admin-container { max-width: 800px; margin: 0 auto; background: var(--card-bg); border: 1px solid var(--border-color); padding: 2rem; border-radius: 16px; }
+        .admin-container h2 { margin-bottom: 1.5rem; font-size: 1.8rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; color: var(--accent-color); }
+        
+        /* Nav Tabs */
+        .admin-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
+        .tab-btn { background: #18181b; color: var(--text-muted); border: 1px solid var(--border-color); padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: 0.15s; }
+        .tab-btn.active { background: var(--accent-color); color: #000; border-color: var(--accent-color); }
+        
+        .admin-section { display: none; }
+        .admin-section.active { display: block; }
+
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; background: #050505; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.8rem 1rem; color: var(--text-color); font-family: var(--font-family); font-size: 1rem; outline: none; transition: border-color 0.2s; }
+        
+        .btn { background: var(--accent-color); color: #000000; border: none; padding: 0.8rem 2rem; font-weight: 600; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: opacity 0.2s; margin-bottom: 1rem;}
         .btn:hover { opacity: 0.9; }
         .btn:disabled { background: #3f3f46; cursor: not-allowed; }
+        .btn-danger { background: #ef4444; color: #fff; }
+        .btn-secondary { background: #27272a; color: #fff; }
+        
+        .item-list { display: flex; flex-direction: column; gap: 10px; margin-top: 1rem; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #050505; border: 1px solid var(--border-color); border-radius: 8px; }
+        .list-item-info h4 { font-size: 1rem; color: var(--text-color); }
+        .list-item-info p { font-size: 0.8rem; color: var(--text-muted); }
+        .item-actions { display: flex; gap: 8px; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; margin-bottom: 0; }
     </style>
 </head>
 <body>
     <div class="admin-container">
-        <h2>แอดมินจัดการระบบ</h2>
-        <form id="post-form">
-            <div class="form-group">
-                <label>หัวข้อข่าวสาร / อัปเดต</label>
-                <input type="text" id="post-title" required>
-            </div>
-            <div class="form-group">
-                <label>หมวดหมู่อัปเดตระบบ</label>
-                <select id="post-category">
-                    <option value="ประกาศสำคัญ">ประกาศสำคัญ</option>
-                    <option value="อัปเดตระบบ">อัปเดตระบบ</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>เนื้อหาบทความ</label>
-                <textarea id="post-content" rows="6" required></textarea>
-            </div>
-            <div class="form-group">
-                <label>อัปโหลดรูปภาพประกอบ (ระบุหรือไม่ก็ได้)</label>
-                <input type="file" id="imageInput" accept="image/*">
-                <img id="preview" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-top: 1.5rem; display: none; border: 1px solid var(--border-color);">
-            </div>
-            <button type="submit" id="submitBtn" class="btn">เผยแพร่อัปเดต</button>
-        </form>
+        <h2>SparkOne - ระบบจัดการหลังบ้าน</h2>
+        
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="switchTab('post-create')">จัดการโพสต์ > โพสต์</button>
+            <button class="tab-btn" onclick="switchTab('post-manage')">จัดการโพสต์ > แก้ไขโพสต์</button>
+            <button class="tab-btn" onclick="switchTab('proj-create')">จัดการโปรเจค > โพสต์โปรเจค</button>
+            <button class="tab-btn" onclick="switchTab('proj-manage')">จัดการโปรเจค > อัปเดตโปรเจค</button>
+        </div>
+
+        <div id="post-create" class="admin-section active">
+            <form id="post-form">
+                <input type="hidden" id="edit-post-id">
+                <div class="form-group">
+                    <label id="post-form-mode">หัวข้อข่าวสาร / อัปเดต (สร้างใหม่)</label>
+                    <input type="text" id="post-title" required>
+                </div>
+                <div class="form-group">
+                    <label>หมวดหมู่อัปเดตระบบ</label>
+                    <select id="post-category">
+                        <option value="ประกาศสำคัญ">ประกาศสำคัญ</option>
+                        <option value="อัปเดตระบบ">อัปเดตระบบ</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>เนื้อหาบทความ</label>
+                    <textarea id="post-content" rows="6" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>อัปโหลดรูปภาพประกอบ (ระบุหรือไม่ก็ได้)</label>
+                    <input type="file" id="imageInput" accept="image/*">
+                    <img id="preview" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-top: 1.5rem; display: none; border: 1px solid var(--border-color);">
+                </div>
+                <button type="submit" id="submitBtn" class="btn">เผยแพร่อัปเดต</button>
+                <button type="button" id="cancelPostEditBtn" class="btn btn-secondary" style="display:none;" onclick="resetPostForm()">ยกเลิกการแก้ไข</button>
+            </form>
+        </div>
+
+        <div id="post-manage" class="admin-section">
+            <h3>รายการโพสต์ทั้งหมด</h3>
+            <div class="item-list" id="posts-list-target"></div>
+        </div>
+
+        <div id="proj-create" class="admin-section">
+            <form id="proj-form">
+                <input type="hidden" id="edit-proj-id">
+                <div class="form-group">
+                    <label id="proj-form-mode">ชื่อโปรเจกต์ (เช่น NOVA, CheckBank)</label>
+                    <input type="text" id="proj-name" required>
+                </div>
+                <div class="form-group">
+                    <label>คำโปรยสั้นๆ (Tagline)</label>
+                    <input type="text" id="proj-tagline" required>
+                </div>
+                <div class="form-group">
+                    <label>ลิงก์รูปภาพโลโก้โปรเจกต์</label>
+                    <input type="text" id="proj-logo" required>
+                </div>
+                <div class="form-group">
+                    <label>สถานะ (Status เช่น In Development, Live)</label>
+                    <input type="text" id="proj-status" value="In Development" required>
+                </div>
+                <div class="form-group">
+                    <label>เปอร์เซ็นต์ความคืบหน้า (ตัวเลขเท่านั้น 0-100)</label>
+                    <input type="number" id="proj-progress" min="0" max="100" required>
+                </div>
+                <div class="form-group">
+                    <label>ข้อความความคืบหน้า (Progress Text เช่น Phase 1 — Core System (35%))</label>
+                    <input type="text" id="proj-progressText" required>
+                </div>
+                <div class="form-group">
+                    <label>แท็กเทคโนโลยีที่ใช้ (ใช้เครื่องหมายจุลภาค , คั่น เช่น Python,LLM,Firebase)</label>
+                    <input type="text" id="proj-tags" placeholder="Python,LLM,Firebase">
+                </div>
+                <div class="form-group">
+                    <label>รายละเอียดภาพรวม (Overview)</label>
+                    <textarea id="proj-overview" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>ปัญหาและแนวทางแก้ไข (Problem)</label>
+                    <textarea id="proj-problem" rows="3" required></textarea>
+                </div>
+                <button type="submit" id="projSubmitBtn" class="btn">บันทึกโปรเจกต์</button>
+                <button type="button" id="cancelProjEditBtn" class="btn btn-secondary" style="display:none;" onclick="resetProjForm()">ยกเลิกการแก้ไข</button>
+            </form>
+        </div>
+
+        <div id="proj-manage" class="admin-section">
+            <h3>รายการโปรเจกต์ทั้งหมด</h3>
+            <div class="item-list" id="projects-list-target"></div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCFVUtZCTAp_9zSAyrUloNJL62jmpA9xd0",
@@ -61,6 +146,15 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Tab Switcher
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        };
+
+        // --- POSTS ---
         const imageInput = document.getElementById('imageInput');
         const preview = document.getElementById('preview');
         let selectedImage = "null";
@@ -72,7 +166,7 @@
                 reader.onload = (e) => {
                     preview.src = e.target.result;
                     preview.style.display = 'block';
-                    selectedImage = e.target.result; 
+                    selectedImage = e.target.result;
                 };
                 reader.readAsDataURL(file);
             } else {
@@ -81,43 +175,192 @@
             }
         });
 
+        onSnapshot(collection(db, "posts"), (snapshot) => {
+            const listTarget = document.getElementById('posts-list-target');
+            listTarget.innerHTML = '';
+            snapshot.forEach((d) => {
+                const p = d.data();
+                const id = d.id;
+                listTarget.innerHTML += `
+                    <div class="list-item">
+                        <div class="list-item-info">
+                            <h4>${p.title || ''}</h4>
+                            <p>${p.category || ''} • ${p.dateStr || ''}</p>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn btn-sm" onclick="prepareEditPost('${id}', \`${(p.title||'').replace(/`/g, '\`').replace(/\n/g, ' ')}\`, \`${p.category}\`, \`${(p.content||'').replace(/`/g, '\`').replace(/<br>/g, '\n')}\`, \`${p.image||'null'}\`)">แก้ไข</button>
+                            <button class="btn btn-sm btn-danger" onclick="deletePost('${id}')">ลบ</button>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        window.prepareEditPost = function(id, title, category, content, image) {
+            document.getElementById('edit-post-id').value = id;
+            document.getElementById('post-title').value = title;
+            document.getElementById('post-category').value = category;
+            document.getElementById('post-content').value = content;
+            if (image && image !== 'null') {
+                preview.src = image;
+                preview.style.display = 'block';
+                selectedImage = image;
+            } else {
+                preview.style.display = 'none';
+                selectedImage = "null";
+            }
+            document.getElementById('post-form-mode').innerText = "กำลังแก้ไขโพสต์...";
+            document.getElementById('submitBtn').innerText = "อัปเดตข้อมูลโพสต์";
+            document.getElementById('cancelPostEditBtn').style.display = 'inline-block';
+            switchTab('post-create');
+        };
+
+        window.resetPostForm = function() {
+            document.getElementById('post-form').reset();
+            document.getElementById('edit-post-id').value = '';
+            preview.style.display = 'none';
+            selectedImage = "null";
+            document.getElementById('post-form-mode').innerText = "หัวข้อข่าวสาร / อัปเดต (สร้างใหม่)";
+            document.getElementById('submitBtn').innerText = "เผยแพร่อัปเดต";
+            document.getElementById('cancelPostEditBtn').style.display = 'none';
+        };
+
+        window.deletePost = async function(id) {
+            if (confirm("ยืนยันที่จะลบโพสต์นี้ใช่ไหม?")) {
+                try {
+                    await deleteDoc(doc(db, "posts", id));
+                    alert("ลบโพสต์เรียบร้อย!");
+                } catch (e) { alert("ลบไม่สำเร็จ: " + e); }
+            }
+        };
+
         document.getElementById('post-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const btn = document.getElementById('submitBtn');
+            const editId = document.getElementById('edit-post-id').value;
             btn.disabled = true;
-            btn.innerText = "กำลังเผยแพร่...";
 
             const title = document.getElementById('post-title').value;
             const category = document.getElementById('post-category').value;
             let content = document.getElementById('post-content').value;
             content = content.replace(/\n/g, '<br>');
 
-            const today = new Date();
-            const dateStr = `${today.getDate()} ${today.toLocaleString('th-TH', { month: 'long' })} ${today.getFullYear() + 543}`;
-
             try {
-                await addDoc(collection(db, "posts"), {
-                    title: title,
-                    category: category,
-                    content: content,
-                    image: selectedImage,
-                    dateStr: dateStr,
-                    createdAt: Date.now()
-                });
-                alert("โพสต์ข้อมูลสำเร็จ! เช็คหน้าเว็บหลักได้เลยครับ");
-                document.getElementById('post-form').reset();
-                preview.style.display = 'none';
-                selectedImage = "null";
+                if (editId) {
+                    await updateDoc(doc(db, "posts", editId), {
+                        title: title, category: category, content: content, image: selectedImage
+                    });
+                    alert("อัปเดตโพสต์สำเร็จ!");
+                    resetPostForm();
+                } else {
+                    const today = new Date();
+                    const dateStr = `${today.getDate()} ${today.toLocaleString('th-TH', { month: 'long' })} ${today.getFullYear() + 543}`;
+                    await addDoc(collection(db, "posts"), {
+                        title: title, category: category, content: content, image: selectedImage, dateStr: dateStr, createdAt: Date.now()
+                    });
+                    alert("โพสต์ข้อมูลสำเร็จ!");
+                    resetPostForm();
+                }
             } catch (error) {
-                console.error("Error adding document: ", error);
-                alert("เกิดข้อผิดพลาดในการโพสต์ข้อมูล");
+                alert("เกิดข้อผิดพลาด: " + error.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "เผยแพร่อัปเดต";
+            }
+        });
+
+        // --- PROJECTS ---
+        onSnapshot(collection(db, "projects"), (snapshot) => {
+            const listTarget = document.getElementById('projects-list-target');
+            listTarget.innerHTML = '';
+            snapshot.forEach((d) => {
+                const p = d.data();
+                const id = d.id;
+                listTarget.innerHTML += `
+                    <div class="list-item">
+                        <div class="list-item-info">
+                            <h4>${p.name || ''}</h4>
+                            <p>ความคืบหน้า: ${p.progress || 0}% [${p.status || ''}]</p>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn btn-sm" onclick="prepareEditProj('${id}', \`${p.name}\`, \`${p.tagline}\`, \`${p.logo}\`, \`${p.status}\`, ${p.progress}, \`${p.progressText}\`, \`${(p.tags||[]).join(',')}\`, \`${p.overview}\`, \`${p.problem}\`)">แก้ไข</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProj('${id}')">ลบ</button>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        window.prepareEditProj = function(id, name, tagline, logo, status, progress, progressText, tags, overview, problem) {
+            document.getElementById('edit-proj-id').value = id;
+            document.getElementById('proj-name').value = name;
+            document.getElementById('proj-tagline').value = tagline;
+            document.getElementById('proj-logo').value = logo;
+            document.getElementById('proj-status').value = status;
+            document.getElementById('proj-progress').value = progress;
+            document.getElementById('proj-progressText').value = progressText;
+            document.getElementById('proj-tags').value = tags;
+            document.getElementById('proj-overview').value = overview;
+            document.getElementById('proj-problem').value = problem;
+
+            document.getElementById('proj-form-mode').innerText = "กำลังแก้ไขโปรเจกต์...";
+            document.getElementById('projSubmitBtn').innerText = "อัปเดตข้อมูลโปรเจกต์";
+            document.getElementById('cancelProjEditBtn').style.display = 'inline-block';
+            switchTab('proj-create');
+        };
+
+        window.resetProjForm = function() {
+            document.getElementById('proj-form').reset();
+            document.getElementById('edit-proj-id').value = '';
+            document.getElementById('proj-form-mode').innerText = "ชื่อโปรเจกต์ (เช่น NOVA, CheckBank)";
+            document.getElementById('projSubmitBtn').innerText = "บันทึกโปรเจกต์";
+            document.getElementById('cancelProjEditBtn').style.display = 'none';
+        };
+
+        window.deleteProj = async function(id) {
+            if (confirm("ยืนยันที่จะลบโปรเจกต์นี้ออกจากระบบใช่ไหม?")) {
+                try {
+                    await deleteDoc(doc(db, "projects", id));
+                    alert("ลบโปรเจกต์เรียบร้อย!");
+                } catch (e) { alert("ลบไม่สำเร็จ: " + e); }
+            }
+        };
+
+        document.getElementById('proj-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('projSubmitBtn');
+            const editId = document.getElementById('edit-proj-id').value;
+            btn.disabled = true;
+
+            const name = document.getElementById('proj-name').value;
+            const tagline = document.getElementById('proj-tagline').value;
+            const logo = document.getElementById('proj-logo').value;
+            const status = document.getElementById('proj-status').value;
+            const progress = parseInt(document.getElementById('proj-progress').value) || 0;
+            const progressText = document.getElementById('proj-progressText').value;
+            const tagsInput = document.getElementById('proj-tags').value;
+            const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()) : [];
+            const overview = document.getElementById('proj-overview').value;
+            const problem = document.getElementById('proj-problem').value;
+
+            try {
+                if (editId) {
+                    await updateDoc(doc(db, "projects", editId), {
+                        name, tagline, logo, status, progress, progressText, tags, overview, problem
+                    });
+                    alert("อัปเดตโปรเจกต์สำเร็จ!");
+                } else {
+                    await addDoc(collection(db, "projects"), {
+                        name, tagline, logo, status, progress, progressText, tags, overview, problem, createdAt: Date.now()
+                    });
+                    alert("เพิ่มโปรเจกต์ใหม่สำเร็จ!");
+                }
+                resetProjForm();
+            } catch (error) {
+                alert("เกิดข้อผิดพลาด: " + error.message);
+            } finally {
+                btn.disabled = false;
             }
         });
     </script>
 </body>
 </html>
-        
