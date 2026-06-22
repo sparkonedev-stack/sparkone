@@ -433,6 +433,12 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:#27272a;border-radius:2px;}
+
+.post-content.clamped { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.lightbox { display: none; position: fixed; z-index: 9999; padding-top: 60px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); backdrop-filter: blur(5px); }
+.lightbox-content { margin: auto; display: block; max-width: 90%; max-height: 80vh; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+.lightbox-close { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+.lightbox-close:hover { background: rgba(255,255,255,0.4); }
 </style>
 </head>
 <body>
@@ -950,8 +956,15 @@ async function fetchPosts(){
             <span>•</span><span>${p.dateStr||''}</span>
           </div>
           <h3>${p.title||''}</h3>
-          <div class="post-content">${p.content||''}</div>
-          ${p.image&&p.image!=='null'?`<img src="${p.image}" class="post-img" loading="lazy">`:''}
+          <div class="post-content-wrap">
+            <div class="post-content clamped" id="pc-${pid}">${p.content||''}</div>
+            <button class="read-more-btn" id="rmb-${pid}" onclick="toggleReadMore('${pid}')" style="display:none; color:#a78bfa; background:none; border:none; cursor:pointer; font-size:0.85rem; padding:4px 0; margin-top:4px;">ดูเพิ่มเติม</button>
+          </div>
+          ${p.image&&p.image!=='null'?`
+          <div class="img-wrap" style="position:relative; margin-top:0.5rem; display:inline-block; width:100%;">
+            <img src="${p.image}" class="post-img" loading="lazy" onclick="openLightbox('${p.image}')" style="margin-top:0; cursor:zoom-in;">
+            <button class="expand-btn" onclick="openLightbox('${p.image}')" style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.6); color:#fff; border:none; border-radius:4px; padding:6px 10px; cursor:pointer; backdrop-filter:blur(2px);"><i class="bi bi-arrows-fullscreen"></i></button>
+          </div>`:''}
           <div class="action-bar">
             <button class="ab-like" id="abl-${pid}" onclick="handleLike('${pid}')">
               <i class="bi bi-hand-thumbs-up"></i><span class="ab-cnt" id="lc-${pid}">${Math.max(0,p.likes||0)}</span>
@@ -975,6 +988,13 @@ async function fetchPosts(){
             <div class="c-list" id="cl-${pid}"></div>
           </div>`;
         target.appendChild(card);
+            setTimeout(()=>{
+              const pc = document.getElementById('pc-'+pid);
+              if(pc && pc.scrollHeight > pc.clientHeight) {
+                const rmb = document.getElementById('rmb-'+pid);
+                if(rmb) rmb.style.display = 'inline-block';
+              }
+            }, 50);
         listenComments(pid);
       });
       // Restore like state after render
@@ -1484,5 +1504,33 @@ fetchPosts();
   </div>
 </div>
 
+
+<div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+  <span class="lightbox-close" onclick="closeLightbox(event)">&times;</span>
+  <img class="lightbox-content" id="lightbox-img">
+</div>
+<script>
+function toggleReadMore(pid) {
+  const pc = document.getElementById('pc-'+pid);
+  const btn = document.getElementById('rmb-'+pid);
+  if(pc.classList.contains('clamped')) {
+    pc.classList.remove('clamped');
+    btn.innerText = 'ดูน้อยลง';
+  } else {
+    pc.classList.add('clamped');
+    btn.innerText = 'ดูเพิ่มเติม';
+  }
+}
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').style.display = 'block';
+}
+function closeLightbox(e) {
+  if(e) e.stopPropagation();
+  if(!e || e.target.id === 'lightbox' || e.target.classList.contains('lightbox-close')) {
+    document.getElementById('lightbox').style.display = 'none';
+  }
+}
+</script>
 </body>
 </html>
