@@ -439,6 +439,19 @@ header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgb
 .lightbox-content { margin: auto; display: block; max-width: 90%; max-height: 80vh; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
 .lightbox-close { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
 .lightbox-close:hover { background: rgba(255,255,255,0.4); }
+
+    /* --- Project Logo Override --- */
+    .project-card .project-logo {
+        width: 96px !important;
+        height: 96px !important;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        border-radius: 22px !important; /* ให้มุมโค้งมนเข้ากับไอคอนแอป */
+        object-fit: cover !important;
+    }
+
 </style>
 </head>
 <body>
